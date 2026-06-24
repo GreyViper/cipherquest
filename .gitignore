@@ -1,0 +1,7 @@
+# Track only CipherQuest files
+*
+!.gitignore
+!cipherquest_v4.html
+!cipherquest_v5.html
+!docs/
+!docs/**
