@@ -193,6 +193,9 @@ body { font-family: monospace; background: #0d0d0d; color: #eee; min-height: 100
 .polybius-cell span { display: block; color: #888; font-size: 10px; font-weight: bold; }
 .playfair-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; font-size: 10px; }
 .playfair-cell { text-align: center; padding: 3px 0; color: #888; border: 0.5px solid #222; border-radius: 2px; }
+
+.flag-btn { background: none; border: 0.5px solid #2a2a2a; border-radius: 6px; font-size: 9px; color: #333; cursor: pointer; padding: 3px 8px; font-family: monospace; margin-top: 6px; }
+.flag-btn:hover { color: #D85A30; border-color: #D85A30; }
 </style>
 </head>
 <body>
@@ -512,6 +515,9 @@ body { font-family: monospace; background: #0d0d0d; color: #eee; min-height: 100
     <button class="submit-btn" onclick="checkPlayfair()">SUBMIT ↵</button>
   </div>
 
+  <div style="text-align:right; margin-top:4px;">
+    <button class="flag-btn" id="flag-btn" style="display:none" onclick="flagPuzzle()">⚑ REPORT PUZZLE</button>
+  </div>
   <div class="feedback" id="feedback"></div>
 </div>
 
@@ -1250,7 +1256,7 @@ function startGame(type, daily=false) {
 function pickUnused(arr) {
   const pool = getWordPool(currentGameType);
   // Also mix in encoder-submitted puzzles
-  const encPuzzles = getEncoderPuzzles().filter(p => p.type === currentGameType);
+  const encPuzzles = getEncoderPuzzles().filter(p => p.type === currentGameType && !p.hidden);
   const combined = [...pool, ...encPuzzles.map(p => ({
     word: p.word || p.text, text: p.word || p.text,
     hint: p.hint || 'Submitted by ' + p.encoder,
@@ -1293,6 +1299,9 @@ function setupMorseRound() {
   state.currentWord = item.word || item.text;
   state.currentDifficulty = calcDifficulty('morse', state.currentWord.replace(/ /g,'').length);
   state._puzzleId = item._id || null;
+  document.getElementById('flag-btn').style.display = state._puzzleId ? 'inline-block' : 'none';
+  document.getElementById('flag-btn').textContent = '⚑ REPORT PUZZLE';
+  document.getElementById('flag-btn').disabled = false;
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   document.getElementById('cipher-display').textContent = toMorse(state.currentWord);
@@ -1305,6 +1314,9 @@ function setupAnagramRound() {
   state.currentWord = item.word || item.text;
   state.currentDifficulty = calcDifficulty('anagram', state.currentWord.replace(/ /g,'').length);
   state._puzzleId = item._id || null;
+  document.getElementById('flag-btn').style.display = state._puzzleId ? 'inline-block' : 'none';
+  document.getElementById('flag-btn').textContent = '⚑ REPORT PUZZLE';
+  document.getElementById('flag-btn').disabled = false;
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   document.getElementById('anagram-category').textContent = 'CATEGORY: ' + (item.category||'COMMUNITY');
@@ -1320,6 +1332,9 @@ function setupCaesarRound() {
   state.currentWord = item.text || item.word;
   state.currentDifficulty = calcDifficulty('caesar', state.currentWord.replace(/ /g,'').length);
   state._puzzleId = item._id || null;
+  document.getElementById('flag-btn').style.display = state._puzzleId ? 'inline-block' : 'none';
+  document.getElementById('flag-btn').textContent = '⚑ REPORT PUZZLE';
+  document.getElementById('flag-btn').disabled = false;
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   const shift = Math.floor(Math.random()*8)+2;
@@ -1336,6 +1351,9 @@ function setupBinaryRound() {
   state.currentWord = item.word || item.text;
   state.currentDifficulty = calcDifficulty('binary', state.currentWord.replace(/ /g,'').length);
   state._puzzleId = item._id || null;
+  document.getElementById('flag-btn').style.display = state._puzzleId ? 'inline-block' : 'none';
+  document.getElementById('flag-btn').textContent = '⚑ REPORT PUZZLE';
+  document.getElementById('flag-btn').disabled = false;
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   document.getElementById('binary-display').textContent = toBinary(state.currentWord);
@@ -1360,6 +1378,9 @@ function setupAtbashRound() {
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   state._puzzleId = item._id || null;
+  document.getElementById('flag-btn').style.display = state._puzzleId ? 'inline-block' : 'none';
+  document.getElementById('flag-btn').textContent = '⚑ REPORT PUZZLE';
+  document.getElementById('flag-btn').disabled = false;
   document.getElementById('atbash-display').textContent = toAtbash(state.currentWord);
   document.getElementById('atbash-input').value = '';
   document.getElementById('atbash-input').className = 'answer-input';
@@ -1390,6 +1411,9 @@ function setupVigenereRound() {
   state.currentKeyword = item.keyword || 'KEY';
   state._encoder = item._encoder;
   state._puzzleId = item._id || null;
+  document.getElementById('flag-btn').style.display = state._puzzleId ? 'inline-block' : 'none';
+  document.getElementById('flag-btn').textContent = '⚑ REPORT PUZZLE';
+  document.getElementById('flag-btn').disabled = false;
   document.getElementById('vigenere-keyword-display').textContent = state.currentKeyword;
   document.getElementById('vigenere-display').textContent = toVigenere(state.currentWord, state.currentKeyword);
   document.getElementById('vigenere-input').value = '';
@@ -1426,6 +1450,9 @@ function setupRailFenceRound() {
   state.currentRails = item.rails || 2;
   state._encoder = item._encoder;
   state._puzzleId = item._id || null;
+  document.getElementById('flag-btn').style.display = state._puzzleId ? 'inline-block' : 'none';
+  document.getElementById('flag-btn').textContent = '⚑ REPORT PUZZLE';
+  document.getElementById('flag-btn').disabled = false;
   document.getElementById('railfence-label').textContent = `RAIL FENCE — ${state.currentRails} RAILS`;
   document.getElementById('railfence-visual').textContent = buildRailFenceVisual(state.currentWord, state.currentRails);
   document.getElementById('railfence-display').textContent = toRailFence(state.currentWord, state.currentRails);
@@ -1458,6 +1485,9 @@ function setupPolybiusRound() {
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   state._puzzleId = item._id || null;
+  document.getElementById('flag-btn').style.display = state._puzzleId ? 'inline-block' : 'none';
+  document.getElementById('flag-btn').textContent = '⚑ REPORT PUZZLE';
+  document.getElementById('flag-btn').disabled = false;
   document.getElementById('polybius-display').textContent = toPolybius(state.currentWord);
   document.getElementById('polybius-input').value = '';
   document.getElementById('polybius-input').className = 'answer-input';
@@ -1492,6 +1522,9 @@ function setupColumnarRound() {
   state.currentKeyword = item.keyword || 'KEY';
   state._encoder = item._encoder;
   state._puzzleId = item._id || null;
+  document.getElementById('flag-btn').style.display = state._puzzleId ? 'inline-block' : 'none';
+  document.getElementById('flag-btn').textContent = '⚑ REPORT PUZZLE';
+  document.getElementById('flag-btn').disabled = false;
   document.getElementById('columnar-keyword-display').textContent = state.currentKeyword;
   document.getElementById('columnar-display').textContent = toColumnar(state.currentWord, state.currentKeyword);
   document.getElementById('columnar-input').value = '';
@@ -1524,6 +1557,9 @@ function setupPigpenRound() {
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   state._puzzleId = item._id || null;
+  document.getElementById('flag-btn').style.display = state._puzzleId ? 'inline-block' : 'none';
+  document.getElementById('flag-btn').textContent = '⚑ REPORT PUZZLE';
+  document.getElementById('flag-btn').disabled = false;
   document.getElementById('pigpen-display').innerHTML = toPigpen(state.currentWord);
   document.getElementById('pigpen-input').value = '';
   document.getElementById('pigpen-input').className = 'answer-input';
@@ -1553,6 +1589,9 @@ function setupPlayfairRound() {
   state.currentKeyword = item.keyword || 'CIPHER';
   state._encoder = item._encoder;
   state._puzzleId = item._id || null;
+  document.getElementById('flag-btn').style.display = state._puzzleId ? 'inline-block' : 'none';
+  document.getElementById('flag-btn').textContent = '⚑ REPORT PUZZLE';
+  document.getElementById('flag-btn').disabled = false;
   document.getElementById('playfair-keyword-display').textContent = state.currentKeyword;
   document.getElementById('playfair-display').textContent = toPlayfair(state.currentWord, state.currentKeyword);
   document.getElementById('playfair-input').value = '';
@@ -1854,6 +1893,19 @@ function resetEncoder() {
   document.querySelectorAll('.enc-type-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('enc-step-2').classList.remove('active');
   document.getElementById('enc-step-1').classList.add('active');
+}
+
+// ── COMMUNITY FLAGGING ──
+function flagPuzzle() {
+  if (!state._puzzleId) return;
+  const puzzles = getEncoderPuzzles();
+  const idx = puzzles.findIndex(p => p.id === state._puzzleId);
+  if (idx === -1) return;
+  puzzles[idx].reports = (puzzles[idx].reports || 0) + 1;
+  if (puzzles[idx].reports >= 5) puzzles[idx].hidden = true;
+  save('cq_encoder_puzzles', puzzles.slice(0, 50));
+  document.getElementById('flag-btn').textContent = '⚑ REPORTED';
+  document.getElementById('flag-btn').disabled = true;
 }
 
 // ── KEYBOARD ──
