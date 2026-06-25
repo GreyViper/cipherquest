@@ -944,11 +944,22 @@ function buildCaesarRef(shift) {
 }
 
 function getWordPool(type) {
-  if (type==='morse')   return difficulty==='hard' ? MORSE_HARD   : MORSE_EASY;
-  if (type==='anagram') return difficulty==='hard' ? ANAGRAM_HARD : ANAGRAM_EASY;
-  if (type==='caesar')  return difficulty==='hard' ? CAESAR_HARD  : CAESAR_EASY;
-  if (type==='binary')  return difficulty==='hard' ? BINARY_HARD  : BINARY_EASY;
-  return [];
+  const pools = {
+    morse:    [MORSE_EASY,    MORSE_HARD],
+    anagram:  [ANAGRAM_EASY,  ANAGRAM_HARD],
+    caesar:   [CAESAR_EASY,   CAESAR_HARD],
+    binary:   [BINARY_EASY,   BINARY_HARD],
+    atbash:   [ATBASH_EASY,   ATBASH_HARD],
+    vigenere: [VIGENERE_EASY, VIGENERE_HARD],
+    railfence:[RAILFENCE_EASY,RAILFENCE_HARD],
+    polybius: [POLYBIUS_EASY, POLYBIUS_HARD],
+    columnar: [COLUMNAR_EASY, COLUMNAR_HARD],
+    pigpen:   [PIGPEN_EASY,   PIGPEN_HARD],
+    playfair: [PLAYFAIR_EASY, PLAYFAIR_HARD],
+  };
+  const pair = pools[type];
+  if (!pair) return [];
+  return difficulty === 'hard' ? pair[1] : pair[0];
 }
 
 function startGame(type, daily=false) {
@@ -958,12 +969,17 @@ function startGame(type, daily=false) {
   usedIndices = [];
   const timeLimit = difficulty==='hard' ? 15 : 30;
   state = { score:0, round:0, totalRounds:5, timer:null, timeLeft:timeLimit, timeLimit, correct:0, totalTime:0, hintUsed:false, currentWord:'', caesarShift:0 };
-  const labels = {morse:'MORSE CODE',anagram:'ANAGRAM',caesar:'CAESAR CIPHER',binary:'BINARY'};
+  const labels = {
+    morse:'MORSE CODE', anagram:'ANAGRAM', caesar:'CAESAR CIPHER', binary:'BINARY',
+    atbash:'ATBASH CIPHER', vigenere:'VIGENÈRE CIPHER', railfence:'RAIL FENCE',
+    polybius:'POLYBIUS SQUARE', columnar:'COLUMNAR', pigpen:'PIGPEN CIPHER',
+    playfair:'PLAYFAIR CIPHER',
+  };
   let labelHtml = labels[type];
   if (daily) labelHtml += '<span class="daily-badge">DAILY</span>';
   else labelHtml += `<span class="diff-badge ${difficulty}">${difficulty.toUpperCase()}</span>`;
   document.getElementById('game-type-label').innerHTML = labelHtml;
-  ['morse','anagram','caesar','binary'].forEach(t =>
+  ['morse','anagram','caesar','binary','atbash','vigenere','railfence','polybius','columnar','pigpen','playfair'].forEach(t =>
     document.getElementById(t+'-ui').style.display = t===type ? 'block' : 'none'
   );
   document.getElementById('play-again-btn').onclick = () => startGame(type);
@@ -997,10 +1013,20 @@ function nextRound() {
   document.getElementById('feedback').className = 'feedback';
   document.getElementById('score-display').textContent = state.score;
   document.getElementById('progress-fill').style.width = ((state.round-1)/state.totalRounds*100)+'%';
-  if (currentGameType==='morse')   setupMorseRound();
-  else if (currentGameType==='anagram') setupAnagramRound();
-  else if (currentGameType==='caesar')  setupCaesarRound();
-  else setupBinaryRound();
+  const setupMap = {
+    morse:     setupMorseRound,
+    anagram:   setupAnagramRound,
+    caesar:    setupCaesarRound,
+    binary:    setupBinaryRound,
+    atbash:    setupAtbashRound,
+    vigenere:  setupVigenereRound,
+    railfence: setupRailFenceRound,
+    polybius:  setupPolybiusRound,
+    columnar:  setupColumnarRound,
+    pigpen:    setupPigpenRound,
+    playfair:  setupPlayfairRound,
+  };
+  (setupMap[currentGameType] || setupMorseRound)();
   startTimer();
 }
 
