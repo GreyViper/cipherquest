@@ -182,6 +182,17 @@ body { font-family: monospace; background: #0d0d0d; color: #eee; min-height: 100
 .modal-input:focus { outline: none; border-color: #1D9E75; }
 .modal-btn { width: 100%; padding: 10px; border-radius: 7px; font-family: monospace; font-size: 12px; letter-spacing: 2px; cursor: pointer; background: transparent; border: 1.5px solid #1D9E75; color: #1D9E75; }
 .modal-btn:hover { background: #0a2a1e; }
+
+/* ── NEW CIPHER UI ── */
+.keyword-display { font-size: 11px; color: #c9a84c; letter-spacing: 3px; text-align: center; margin-bottom: 6px; }
+.keyword-val { font-size: 15px; font-weight: bold; color: #c9a84c; letter-spacing: 4px; }
+.pigpen-display { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; padding: 0.8rem; min-height: 60px; gap: 2px; }
+.rf-visual { font-family: monospace; font-size: 11px; color: #666; letter-spacing: 2px; line-height: 1.8; text-align: center; margin-bottom: 6px; }
+.polybius-ref { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; font-size: 9px; }
+.polybius-cell { text-align: center; padding: 2px; }
+.polybius-cell span { display: block; color: #888; font-size: 10px; font-weight: bold; }
+.playfair-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; font-size: 10px; }
+.playfair-cell { text-align: center; padding: 3px 0; color: #888; border: 0.5px solid #222; border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -331,6 +342,132 @@ body { font-family: monospace; background: #0d0d0d; color: #eee; min-height: 100
       <button class="hint-btn" onclick="showHint('binary')">HINT −10pts</button>
     </div>
     <button class="submit-btn" onclick="checkBinary()">SUBMIT ↵</button>
+  </div>
+
+  <!-- ATBASH UI -->
+  <div id="atbash-ui" style="display:none">
+    <div class="cipher-box">
+      <div class="cipher-label">REVERSE THE ALPHABET — A↔Z, B↔Y, C↔X</div>
+      <div class="cipher-text" id="atbash-display"></div>
+    </div>
+    <div class="ref-box">
+      <div class="ref-title">ATBASH REFERENCE</div>
+      <div id="atbash-ref-grid"></div>
+    </div>
+    <input class="answer-input" id="atbash-input" type="text" placeholder="TYPE DECODED WORD..." autocomplete="off" />
+    <div class="hint-row">
+      <div class="hint-text" id="atbash-hint-text"></div>
+      <button class="hint-btn" onclick="showHint('atbash')">HINT −10pts</button>
+    </div>
+    <button class="submit-btn" onclick="checkAtbash()">SUBMIT ↵</button>
+  </div>
+
+  <!-- VIGENERE UI -->
+  <div id="vigenere-ui" style="display:none">
+    <div class="cipher-box">
+      <div class="cipher-label">VIGENÈRE — KEYWORD SHIFTS EACH LETTER</div>
+      <div class="keyword-display">KEYWORD: <span class="keyword-val" id="vigenere-keyword-display"></span></div>
+      <div class="cipher-text" id="vigenere-display"></div>
+    </div>
+    <div class="ref-box">
+      <div class="ref-title">HOW TO DECODE: SUBTRACT KEYWORD LETTER POSITION FROM EACH LETTER</div>
+      <div id="vigenere-ref-grid" style="font-size:10px; color:#444; text-align:center; padding:4px;"></div>
+    </div>
+    <input class="answer-input" id="vigenere-input" type="text" placeholder="TYPE DECODED MESSAGE..." autocomplete="off" />
+    <div class="hint-row">
+      <div class="hint-text" id="vigenere-hint-text"></div>
+      <button class="hint-btn" onclick="showHint('vigenere')">HINT −10pts</button>
+    </div>
+    <button class="submit-btn" onclick="checkVigenere()">SUBMIT ↵</button>
+  </div>
+
+  <!-- RAIL FENCE UI -->
+  <div id="railfence-ui" style="display:none">
+    <div class="cipher-box">
+      <div class="cipher-label" id="railfence-label">RAIL FENCE — READ THE ZIGZAG</div>
+      <div class="rf-visual" id="railfence-visual"></div>
+      <div class="cipher-text" id="railfence-display"></div>
+    </div>
+    <input class="answer-input" id="railfence-input" type="text" placeholder="TYPE DECODED WORD..." autocomplete="off" />
+    <div class="hint-row">
+      <div class="hint-text" id="railfence-hint-text"></div>
+      <button class="hint-btn" onclick="showHint('railfence')">HINT −10pts</button>
+    </div>
+    <button class="submit-btn" onclick="checkRailFence()">SUBMIT ↵</button>
+  </div>
+
+  <!-- POLYBIUS UI -->
+  <div id="polybius-ui" style="display:none">
+    <div class="cipher-box">
+      <div class="cipher-label">POLYBIUS SQUARE — NUMBER PAIRS = ROW, COLUMN</div>
+      <div class="cipher-text" id="polybius-display" style="font-size:14px; letter-spacing:2px;"></div>
+    </div>
+    <div class="ref-box">
+      <div class="ref-title">POLYBIUS GRID (A–Z, I=J)</div>
+      <div id="polybius-ref-grid" class="polybius-ref"></div>
+    </div>
+    <input class="answer-input" id="polybius-input" type="text" placeholder="TYPE DECODED WORD..." autocomplete="off" />
+    <div class="hint-row">
+      <div class="hint-text" id="polybius-hint-text"></div>
+      <button class="hint-btn" onclick="showHint('polybius')">HINT −10pts</button>
+    </div>
+    <button class="submit-btn" onclick="checkPolybius()">SUBMIT ↵</button>
+  </div>
+
+  <!-- COLUMNAR UI -->
+  <div id="columnar-ui" style="display:none">
+    <div class="cipher-box">
+      <div class="cipher-label">COLUMNAR — REORDER COLUMNS BY KEYWORD</div>
+      <div class="keyword-display">KEYWORD: <span class="keyword-val" id="columnar-keyword-display"></span></div>
+      <div class="cipher-text" id="columnar-display" style="font-size:13px; letter-spacing:2px;"></div>
+    </div>
+    <div class="ref-box">
+      <div class="ref-title">COLUMN ORDER</div>
+      <div id="columnar-ref-grid" style="font-size:10px; color:#555; text-align:center;"></div>
+    </div>
+    <input class="answer-input" id="columnar-input" type="text" placeholder="TYPE DECODED WORD..." autocomplete="off" />
+    <div class="hint-row">
+      <div class="hint-text" id="columnar-hint-text"></div>
+      <button class="hint-btn" onclick="showHint('columnar')">HINT −10pts</button>
+    </div>
+    <button class="submit-btn" onclick="checkColumnar()">SUBMIT ↵</button>
+  </div>
+
+  <!-- PIGPEN UI -->
+  <div id="pigpen-ui" style="display:none">
+    <div class="cipher-box">
+      <div class="cipher-label">PIGPEN CIPHER — MATCH SYMBOLS TO LETTERS</div>
+      <div class="pigpen-display" id="pigpen-display"></div>
+    </div>
+    <div class="ref-box">
+      <div class="ref-title">PIGPEN REFERENCE</div>
+      <div id="pigpen-ref-grid" style="text-align:center; padding:4px;"></div>
+    </div>
+    <input class="answer-input" id="pigpen-input" type="text" placeholder="TYPE DECODED WORD..." autocomplete="off" />
+    <div class="hint-row">
+      <div class="hint-text" id="pigpen-hint-text"></div>
+      <button class="hint-btn" onclick="showHint('pigpen')">HINT −10pts</button>
+    </div>
+    <button class="submit-btn" onclick="checkPigpen()">SUBMIT ↵</button>
+  </div>
+
+  <!-- PLAYFAIR UI -->
+  <div id="playfair-ui" style="display:none">
+    <div class="cipher-box">
+      <div class="cipher-label">PLAYFAIR CIPHER — DECODE LETTER PAIRS</div>
+      <div class="keyword-display">KEYWORD: <span class="keyword-val" id="playfair-keyword-display"></span></div>
+      <div class="cipher-text" id="playfair-display" style="font-size:14px; letter-spacing:3px;"></div>
+    </div>
+    <div class="ref-box">
+      <div class="ref-title">PLAYFAIR GRID</div>
+      <div id="playfair-ref-grid" class="playfair-grid"></div>
+    </div>
+    <input class="answer-input" id="playfair-input" type="text" placeholder="TYPE DECODED WORD..." autocomplete="off" />
+    <div class="hint-row">
+      <div class="hint-text" id="playfair-hint-text"></div>
+      <button class="hint-btn" onclick="showHint('playfair')">HINT −10pts</button>
+    </div>
+    <button class="submit-btn" onclick="checkPlayfair()">SUBMIT ↵</button>
   </div>
 
   <div class="feedback" id="feedback"></div>
