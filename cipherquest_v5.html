@@ -515,6 +515,146 @@ const BINARY_HARD = [
   {word:'CIPHER',hint:'Encryption method'},
 ];
 
+// ── ATBASH POOLS ──
+const ATBASH_EASY = [
+  {word:'CAT',   hint:'Common household pet'},
+  {word:'HERO',  hint:'A brave person'},
+  {word:'MIND',  hint:'Where thoughts live'},
+  {word:'PLANT', hint:'A living organism that grows'},
+  {word:'CROWN', hint:'Worn by royalty'},
+  {word:'FLAME', hint:'Fire in action'},
+  {word:'BRAVE', hint:'Showing courage'},
+  {word:'SLEEP', hint:'State of rest'},
+];
+const ATBASH_HARD = [
+  {word:'KINGDOM',   hint:'Land ruled by a king'},
+  {word:'MYSTERY',   hint:'Something unknown or secret'},
+  {word:'PHANTOM',   hint:'A ghost or apparition'},
+  {word:'LABYRINTH', hint:'A complex maze'},
+  {word:'CLOCKWORK', hint:'Mechanical gears in motion'},
+  {word:'UNIVERSE',  hint:'All of space and time'},
+];
+
+// ── VIGENERE POOLS ──
+const VIGENERE_EASY = [
+  {word:'OCEAN',  keyword:'KEY', hint:'Large body of salt water'},
+  {word:'TIGER',  keyword:'CAT', hint:'Striped big cat'},
+  {word:'FOREST', keyword:'OAK', hint:'Dense area of trees'},
+  {word:'PLANET', keyword:'SUN', hint:'Orbits a star'},
+  {word:'CASTLE', keyword:'KEY', hint:'Where royalty lived'},
+  {word:'SILVER', keyword:'ORE', hint:'Shiny precious metal'},
+  {word:'WINTER', keyword:'ICE', hint:'Coldest season'},
+  {word:'BRIDGE', keyword:'KEY', hint:'Spans a gap'},
+];
+const VIGENERE_HARD = [
+  {word:'SIGNAL',     keyword:'MORSE', hint:'A transmitted message'},
+  {word:'PHANTOM',    keyword:'GHOST', hint:'A supernatural apparition'},
+  {word:'LABYRINTH',  keyword:'MAZE',  hint:'A complex maze'},
+  {word:'CLOCKWORK',  keyword:'TIME',  hint:'Mechanical gears in motion'},
+  {word:'ASTRONOMY',  keyword:'STARS', hint:'Study of celestial objects'},
+  {word:'REVOLUTION', keyword:'POWER', hint:'A complete turn or uprising'},
+];
+
+// ── RAIL FENCE POOLS ──
+const RAILFENCE_EASY = [
+  {word:'HELLO',  rails:2, hint:'Common greeting'},
+  {word:'TIGER',  rails:2, hint:'Striped predator'},
+  {word:'CASTLE', rails:2, hint:'Medieval fortress'},
+  {word:'DRAGON', rails:2, hint:'Mythical fire-breather'},
+  {word:'PLANET', rails:2, hint:'Orbits a star'},
+  {word:'WINTER', rails:2, hint:'Coldest season'},
+  {word:'BRIDGE', rails:2, hint:'Spans a gap'},
+  {word:'SILVER', rails:2, hint:'Shiny precious metal'},
+];
+const RAILFENCE_HARD = [
+  {word:'PHANTOM',   rails:3, hint:'A ghost or apparition'},
+  {word:'LABYRINTH', rails:3, hint:'A complex maze'},
+  {word:'CLOCKWORK', rails:3, hint:'Mechanical gears in motion'},
+  {word:'DISCOVERY', rails:3, hint:'Finding something new'},
+  {word:'FIREWORKS', rails:3, hint:'Colorful explosion display'},
+  {word:'MESSENGER', rails:3, hint:'One who carries information'},
+];
+
+// ── POLYBIUS POOLS ──
+const POLYBIUS_EASY = [
+  {word:'ACE', hint:'Number one rank'},
+  {word:'KEY', hint:'Opens a lock'},
+  {word:'FOX', hint:'Clever orange animal'},
+  {word:'MAP', hint:'Shows you where to go'},
+  {word:'NET', hint:'Catches fish or connects computers'},
+  {word:'OWL', hint:'Nocturnal bird of wisdom'},
+  {word:'SUN', hint:'Center of our solar system'},
+  {word:'WAR', hint:'Armed conflict between groups'},
+];
+const POLYBIUS_HARD = [
+  {word:'SIGNAL',  hint:'A transmitted message'},
+  {word:'PYTHON',  hint:'A large constricting snake'},
+  {word:'KNIGHT',  hint:'Armored warrior on horseback'},
+  {word:'GALAXY',  hint:'A system of billions of stars'},
+  {word:'SPHINX',  hint:'Ancient Egyptian monument'},
+  {word:'TYPHOON', hint:'A tropical cyclone'},
+];
+
+// ── COLUMNAR POOLS ──
+const COLUMNAR_EASY = [
+  {word:'HELLO',  keyword:'KEY',  hint:'Common greeting'},
+  {word:'OCEAN',  keyword:'SEA',  hint:'Large body of salt water'},
+  {word:'TIGER',  keyword:'CAT',  hint:'Striped big cat'},
+  {word:'CASTLE', keyword:'FORT', hint:'Medieval fortress'},
+  {word:'DRAGON', keyword:'FIRE', hint:'Mythical fire-breather'},
+  {word:'PLANET', keyword:'STAR', hint:'Orbits a star'},
+  {word:'WINTER', keyword:'COLD', hint:'Coldest season'},
+  {word:'SILVER', keyword:'ORE',  hint:'Shiny precious metal'},
+];
+const COLUMNAR_HARD = [
+  {word:'PHANTOM',   keyword:'GHOST',   hint:'A supernatural apparition'},
+  {word:'LABYRINTH', keyword:'MAZE',    hint:'A complex maze'},
+  {word:'CLOCKWORK', keyword:'GEARS',   hint:'Mechanical gears in motion'},
+  {word:'DISCOVERY', keyword:'EXPLORE', hint:'Finding something new'},
+  {word:'FIREWORKS', keyword:'SPARK',   hint:'Colorful explosion display'},
+  {word:'MESSENGER', keyword:'CARRY',   hint:'One who carries information'},
+];
+
+// ── PIGPEN POOLS ──
+const PIGPEN_EASY = [
+  {word:'ACE', hint:'Number one rank'},
+  {word:'BEE', hint:'Buzzing insect that makes honey'},
+  {word:'DOG', hint:'Man\'s best friend'},
+  {word:'EGG', hint:'Laid by a bird'},
+  {word:'FIG', hint:'Sweet purple fruit'},
+  {word:'HOP', hint:'A small jump'},
+  {word:'ICE', hint:'Frozen water'},
+  {word:'OAK', hint:'A large sturdy tree'},
+];
+const PIGPEN_HARD = [
+  {word:'BEACON',  hint:'A guiding light or signal'},
+  {word:'CHAPEL',  hint:'A small place of worship'},
+  {word:'DRAGON',  hint:'Mythical fire-breather'},
+  {word:'FALCON',  hint:'A fast bird of prey'},
+  {word:'GOBLIN',  hint:'A mischievous mythical creature'},
+  {word:'HERALD',  hint:'One who announces important news'},
+];
+
+// ── PLAYFAIR POOLS ──
+const PLAYFAIR_EASY = [
+  {word:'HIDE', keyword:'CIPHER', hint:'To conceal something'},
+  {word:'ROCK', keyword:'STONE',  hint:'Solid mineral formation'},
+  {word:'FIRE', keyword:'FLAME',  hint:'Hot and glowing'},
+  {word:'GOLD', keyword:'MINE',   hint:'Precious yellow metal'},
+  {word:'WIND', keyword:'STORM',  hint:'Moving air'},
+  {word:'MOON', keyword:'NIGHT',  hint:'Orbits the Earth'},
+  {word:'DARK', keyword:'SHADE',  hint:'Absence of light'},
+  {word:'WOLF', keyword:'PACK',   hint:'Wild canine predator'},
+];
+const PLAYFAIR_HARD = [
+  {word:'SIGNAL',  keyword:'MORSE',  hint:'A transmitted message'},
+  {word:'PHANTOM', keyword:'GHOST',  hint:'A supernatural apparition'},
+  {word:'KINGDOM', keyword:'CROWN',  hint:'Land ruled by a king'},
+  {word:'ANCIENT', keyword:'RELIC',  hint:'From a very old time'},
+  {word:'ECLIPSE', keyword:'SHADOW', hint:'When one body blocks another'},
+  {word:'PYRAMID', keyword:'EGYPT',  hint:'Ancient triangular monument'},
+];
+
 // ── STATE ──
 let difficulty = 'easy';
 let currentGameType = 'morse';
