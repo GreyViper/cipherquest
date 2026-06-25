@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CipherQuest</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: monospace; background: #0d0d0d; color: #eee; min-height: 100vh; }
+#app { max-width: 540px; margin: 0 auto; padding: 1.5rem 1rem; min-height: 100vh; }
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── MENU ── */
+#menu { text-align: center; padding: 2.5rem 1rem; }
+.game-title { font-size: 30px; font-weight: bold; letter-spacing: 6px; color: #eee; }
+.game-sub { font-size: 10px; letter-spacing: 5px; color: #555; margin-top: 6px; margin-bottom: 2.5rem; }
+.pixel-art { font-size: 36px; margin-bottom: 1rem; }
+.menu-btn { display: block; width: 260px; margin: 9px auto; padding: 11px 0; border: 1.5px solid #333; background: transparent; border-radius: 8px; font-family: monospace; font-size: 12px; letter-spacing: 2px; color: #bbb; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.menu-btn:hover { background: #1a1a1a; border-color: #555; }
+.menu-btn.green { border-color: #1D9E75; color: #1D9E75; }
+.menu-btn.green:hover { background: #0a2a1e; }
+.menu-btn.gold { border-color: #c9a84c; color: #c9a84c; }
+.menu-btn.gold:hover { background: #1a1500; }
+.menu-btn.blue { border-color: #4a90d9; color: #4a90d9; }
+.menu-btn.blue:hover { background: #0a1a2a; }
+.pulse { animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── PUZZLE SELECT ── */
+#puzzle-select { padding: 1.5rem 0; }
+.back-btn { background: none; border: none; color: #555; cursor: pointer; font-family: monospace; font-size: 11px; letter-spacing: 2px; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 6px; }
+.back-btn:hover { color: #ccc; }
+.section-title { font-size: 10px; letter-spacing: 4px; color: #444; margin-bottom: 1rem; }
+.puzzle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.puzzle-card { background: #141414; border: 0.5px solid #2a2a2a; border-radius: 10px; padding: 1.1rem 1rem; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.puzzle-card:hover { border-color: #444; background: #1c1c1c; }
+.puzzle-icon { font-size: 22px; margin-bottom: 6px; color: #999; }
+.puzzle-name { font-size: 12px; font-weight: bold; color: #eee; letter-spacing: 1px; margin-bottom: 3px; }
+.puzzle-desc { font-size: 10px; color: #555; margin-bottom: 6px; }
+.badge { display: inline-block; font-size: 9px; padding: 2px 7px; border-radius: 99px; }
+.badge.available { background: #0a2a1e; color: #1D9E75; border: 0.5px solid #1D9E75; }
+.badge.daily { background: #1a1500; color: #c9a84c; border: 0.5px solid #c9a84c; }
+
+/* ── DIFFICULTY TOGGLE ── */
+.diff-row { display: flex; gap: 8px; margin-bottom: 1.2rem; }
+.diff-btn { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #333; background: transparent; font-family: monospace; font-size: 11px; letter-spacing: 1px; color: #555; cursor: pointer; transition: all 0.15s; }
+.diff-btn.active-easy { border-color: #1D9E75; color: #1D9E75; background: #0a2a1e; }
+.diff-btn.active-hard { border-color: #D85A30; color: #D85A30; background: #2a0a00; }
+
+/* ── GAME ── */
+#game { padding: 1rem 0; }
+.game-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem; }
+.game-type-label { font-size: 10px; letter-spacing: 3px; color: #444; margin-top: 4px; }
+.score-area { display: flex; gap: 14px; align-items: center; }
+.score-label { font-size: 10px; color: #444; }
+.score-val { font-size: 15px; font-weight: bold; color: #eee; }
+.timer { font-size: 20px; font-weight: bold; color: #eee; min-width: 32px; text-align: right; }
+.timer.warning { color: #D85A30; animation: blink 0.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.progress-bar { height: 2px; background: #1a1a1a; border-radius: 99px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: #1D9E75; border-radius: 99px; transition: width 0.3s; }
+.diff-badge { display: inline-block; font-size: 9px; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
+.diff-badge.easy { background: #0a2a1e; color: #1D9E75; }
+.diff-badge.hard { background: #2a0a00; color: #D85A30; }
+.daily-badge { display: inline-block; font-size: 9px; padding: 1px 6px; border-radius: 4px; margin-left: 6px; background: #1a1500; color: #c9a84c; vertical-align: middle; }
+
+/* ── CIPHER BOX ── */
+.cipher-box { background: #141414; border: 0.5px solid #2a2a2a; border-radius: 10px; padding: 1.2rem; margin-bottom: 0.9rem; text-align: center; }
+.cipher-label { font-size: 9px; letter-spacing: 3px; color: #444; margin-bottom: 10px; }
+.cipher-text { font-size: 16px; font-weight: bold; letter-spacing: 3px; color: #eee; line-height: 1.9; word-break: break-word; }
+.ref-box { background: #111; border-radius: 8px; padding: 0.8rem; margin-bottom: 0.9rem; border: 0.5px solid #222; }
+.ref-title { font-size: 9px; letter-spacing: 3px; color: #444; margin-bottom: 6px; }
+.morse-ref-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; }
+.morse-char { font-size: 9px; color: #444; text-align: center; padding: 2px; }
+.morse-char span { display: block; color: #888; font-size: 10px; font-weight: bold; }
+.answer-input { width: 100%; padding: 11px 14px; background: #141414; border: 1.5px solid #2a2a2a; border-radius: 8px; font-family: monospace; font-size: 15px; color: #eee; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
+.answer-input:focus { outline: none; border-color: #1D9E75; }
+.answer-input.correct { border-color: #1D9E75; background: #0a2a1e; }
+.answer-input.wrong { border-color: #D85A30; background: #2a0800; }
+.submit-btn { width: 100%; padding: 11px; background: transparent; border: 1.5px solid #1D9E75; border-radius: 8px; font-family: monospace; font-size: 12px; letter-spacing: 2px; color: #1D9E75; cursor: pointer; }
+.submit-btn:hover { background: #0a2a1e; }
+.hint-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.9rem; }
+.hint-text { font-size: 11px; color: #777; font-style: italic; }
+.hint-btn { background: none; border: 0.5px solid #2a2a2a; border-radius: 6px; font-size: 10px; color: #444; cursor: pointer; padding: 4px 10px; font-family: monospace; }
+.hint-btn:hover { background: #1a1a1a; color: #888; }
+.feedback { text-align: center; padding: 10px; border-radius: 8px; margin-top: 8px; font-size: 12px; letter-spacing: 1px; display: none; }
+.feedback.correct { background: #0a2a1e; color: #1D9E75; display: block; border: 0.5px solid #1D9E75; }
+.feedback.wrong { background: #2a0800; color: #D85A30; display: block; border: 0.5px solid #D85A30; }
+
+/* ── ANAGRAM TILES ── */
+.anagram-category { font-size: 9px; letter-spacing: 4px; color: #444; text-align: center; margin-bottom: 0.9rem; }
+.tile-label { font-size: 9px; letter-spacing: 3px; color: #444; text-align: center; margin-bottom: 6px; }
+.tile-answer-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; min-height: 56px; background: #111; border: 1px dashed #2a2a2a; border-radius: 10px; padding: 10px; margin-bottom: 0.9rem; align-items: center; }
+.tile-answer-placeholder { font-size: 10px; color: #333; letter-spacing: 2px; }
+.tile-pool-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-bottom: 0.9rem; min-height: 56px; align-items: center; }
+.tile { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; font-family: monospace; border-radius: 7px; cursor: pointer; border: 1.5px solid #333; background: #141414; color: #eee; transition: transform 0.1s, background 0.1s; user-select: none; }
+.tile:hover { background: #1e1e1e; transform: scale(1.08); border-color: #555; }
+.tile.in-answer { background: #0a2a1e; border-color: #1D9E75; color: #1D9E75; }
+.tile.used { opacity: 0.15; cursor: default; pointer-events: none; }
+.tile.correct-flash { background: #0a2a1e; border-color: #1D9E75; }
+.tile.wrong-flash { background: #2a0800; border-color: #D85A30; }
+.tile-controls { display: flex; gap: 7px; margin-bottom: 10px; }
+.tile-btn { flex: 1; padding: 9px; background: transparent; border: 0.5px solid #2a2a2a; border-radius: 7px; font-family: monospace; font-size: 10px; letter-spacing: 1px; color: #555; cursor: pointer; }
+.tile-btn:hover { background: #141414; color: #999; }
+.tile-btn.green { border-color: #1D9E75; color: #1D9E75; }
+.tile-btn.green:hover { background: #0a2a1e; }
+
+/* ── RESULT ── */
+#result { text-align: center; padding: 2.5rem 1rem; }
+.result-score { font-size: 52px; font-weight: bold; color: #1D9E75; margin: 0.8rem 0 0.2rem; }
+.result-label { font-size: 10px; letter-spacing: 4px; color: #444; margin-bottom: 2rem; }
+.stats-row { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; }
+.stat-item { text-align: center; }
+.stat-num { font-size: 26px; font-weight: bold; color: #eee; }
+.stat-lbl { font-size: 9px; color: #444; letter-spacing: 2px; margin-top: 3px; }
+.new-record { font-size: 11px; color: #c9a84c; letter-spacing: 2px; margin-bottom: 1rem; animation: pulse 1s infinite; }
+
+/* ── LEADERBOARD ── */
+#leaderboard { padding: 1.5rem 0; }
+.lb-tabs { display: flex; gap: 8px; margin-bottom: 1.2rem; }
+.lb-tab { flex: 1; padding: 8px; border-radius: 7px; border: 0.5px solid #2a2a2a; background: transparent; font-family: monospace; font-size: 10px; letter-spacing: 1px; color: #444; cursor: pointer; }
+.lb-tab.active { border-color: #1D9E75; color: #1D9E75; background: #0a2a1e; }
+.lb-tab.gold-tab.active { border-color: #c9a84c; color: #c9a84c; background: #1a1500; }
+.lb-list { display: flex; flex-direction: column; gap: 6px; }
+.lb-entry { display: flex; align-items: center; gap: 10px; background: #141414; border: 0.5px solid #1e1e1e; border-radius: 8px; padding: 10px 12px; }
+.lb-rank { font-size: 13px; font-weight: bold; color: #444; min-width: 24px; }
+.lb-rank.gold { color: #c9a84c; }
+.lb-rank.silver { color: #aaa; }
+.lb-rank.bronze { color: #cd7f32; }
+.lb-name { flex: 1; font-size: 12px; color: #eee; letter-spacing: 1px; }
+.lb-meta { font-size: 10px; color: #444; text-align: right; }
+.lb-score { font-size: 14px; font-weight: bold; color: #1D9E75; }
+.lb-score.gold-score { color: #c9a84c; }
+.lb-empty { text-align: center; padding: 2rem; font-size: 11px; color: #333; letter-spacing: 2px; }
+.lb-filter { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; }
+.lb-filter-btn { padding: 4px 10px; border-radius: 99px; border: 0.5px solid #2a2a2a; background: transparent; font-family: monospace; font-size: 9px; color: #444; cursor: pointer; }
+.lb-filter-btn.active { border-color: #555; color: #aaa; background: #1a1a1a; }
+
+/* ── ENCODER ── */
+#encoder { padding: 1.5rem 0; }
+.enc-step { display: none; }
+.enc-step.active { display: block; }
+.enc-type-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 1.2rem; }
+.enc-type-card { background: #141414; border: 0.5px solid #2a2a2a; border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.15s; text-align: center; }
+.enc-type-card:hover { border-color: #c9a84c; background: #1a1500; }
+.enc-type-card.selected { border-color: #c9a84c; background: #1a1500; }
+.enc-type-icon { font-size: 20px; margin-bottom: 4px; }
+.enc-type-name { font-size: 11px; font-weight: bold; color: #eee; letter-spacing: 1px; }
+.enc-label { font-size: 9px; letter-spacing: 3px; color: #444; margin-bottom: 6px; margin-top: 1rem; }
+.enc-input { width: 100%; padding: 11px 14px; background: #141414; border: 1.5px solid #2a2a2a; border-radius: 8px; font-family: monospace; font-size: 15px; color: #eee; letter-spacing: 2px; text-transform: uppercase; }
+.enc-input:focus { outline: none; border-color: #c9a84c; }
+.enc-preview-box { background: #111; border: 0.5px solid #2a2a2a; border-radius: 8px; padding: 1rem; margin: 0.9rem 0; text-align: center; }
+.enc-preview-label { font-size: 9px; letter-spacing: 3px; color: #444; margin-bottom: 8px; }
+.enc-preview-text { font-size: 13px; color: #c9a84c; letter-spacing: 2px; line-height: 1.8; word-break: break-all; }
+.enc-hint-input { width: 100%; padding: 9px 12px; background: #141414; border: 1px solid #2a2a2a; border-radius: 7px; font-family: monospace; font-size: 12px; color: #aaa; letter-spacing: 1px; margin-top: 6px; }
+.enc-hint-input:focus { outline: none; border-color: #c9a84c; }
+.enc-btn { width: 100%; padding: 11px; border-radius: 8px; font-family: monospace; font-size: 12px; letter-spacing: 2px; cursor: pointer; margin-top: 10px; }
+.enc-btn.gold { background: transparent; border: 1.5px solid #c9a84c; color: #c9a84c; }
+.enc-btn.gold:hover { background: #1a1500; }
+.enc-btn.green { background: transparent; border: 1.5px solid #1D9E75; color: #1D9E75; }
+.enc-btn.green:hover { background: #0a2a1e; }
+.enc-success { text-align: center; padding: 2rem 1rem; }
+.enc-success-icon { font-size: 40px; margin-bottom: 1rem; }
+.enc-success-title { font-size: 14px; font-weight: bold; letter-spacing: 3px; color: #c9a84c; margin-bottom: 0.5rem; }
+.enc-success-sub { font-size: 11px; color: #555; letter-spacing: 1px; margin-bottom: 2rem; }
+.enc-stats-row { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1.5rem; }
+
+/* ── DAILY ── */
+.daily-streak { display: flex; justify-content: center; gap: 6px; margin-bottom: 1.5rem; }
+.streak-dot { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #333; }
+.streak-dot.done { background: #c9a84c; border-color: #c9a84c; color: #000; }
+.streak-dot.today { border-color: #c9a84c; color: #c9a84c; animation: pulse 1.5s infinite; }
+
+/* ── NAME INPUT MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 100; display: none; }
+.modal-overlay.active { display: flex; }
+.modal { background: #141414; border: 0.5px solid #333; border-radius: 12px; padding: 2rem; width: 300px; text-align: center; }
+.modal-title { font-size: 13px; font-weight: bold; letter-spacing: 2px; color: #eee; margin-bottom: 0.5rem; }
+.modal-sub { font-size: 10px; color: #555; letter-spacing: 1px; margin-bottom: 1.2rem; }
+.modal-input { width: 100%; padding: 10px 12px; background: #0d0d0d; border: 1px solid #333; border-radius: 7px; font-family: monospace; font-size: 14px; color: #eee; letter-spacing: 2px; text-align: center; text-transform: uppercase; margin-bottom: 10px; }
+.modal-input:focus { outline: none; border-color: #1D9E75; }
+.modal-btn { width: 100%; padding: 10px; border-radius: 7px; font-family: monospace; font-size: 12px; letter-spacing: 2px; cursor: pointer; background: transparent; border: 1.5px solid #1D9E75; color: #1D9E75; }
+.modal-btn:hover { background: #0a2a1e; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- NAME MODAL -->
+<div class="modal-overlay" id="name-modal">
+  <div class="modal">
+    <div class="modal-title">ENTER YOUR NAME</div>
+    <div class="modal-sub">SHOWN ON LEADERBOARDS</div>
+    <input class="modal-input" id="name-input" maxlength="12" placeholder="PLAYER" autocomplete="off" />
+    <button class="modal-btn" onclick="saveName()">SAVE ↵</button>
+  </div>
+</div>
+
+<!-- MAIN MENU -->
+<div id="menu" class="screen active">
+  <div class="pixel-art">&#9632;&#9633;&#9632;</div>
+  <div class="game-title">CIPHERQUEST</div>
+  <div class="game-sub">DECODE · ENCODE · CONQUER</div>
+  <button class="menu-btn green pulse" onclick="showScreen('puzzle-select')">▶ PLAY</button>
+  <button class="menu-btn gold" onclick="showDailyChallenge()">★ DAILY CHALLENGE</button>
+  <button class="menu-btn gold" onclick="showScreen('encoder')">✎ ENCODER PLATFORM</button>
+  <button class="menu-btn blue" onclick="showScreen('leaderboard'); renderLeaderboard()">⊞ LEADERBOARD</button>
+  <button class="menu-btn" onclick="showHowToPlay()">? HOW TO PLAY</button>
+  <div style="margin-top:1.5rem; font-size:10px; color:#333; letter-spacing:1px;" id="menu-player-name"></div>
+</div>
+
+<!-- PUZZLE SELECT -->
+<div id="puzzle-select" class="screen">
+  <button class="back-btn" onclick="showScreen('menu')">← BACK</button>
+  <div class="section-title">DIFFICULTY</div>
+  <div class="diff-row">
+    <button class="diff-btn active-easy" id="diff-easy" onclick="setDiff('easy')">EASY — 30s</button>
+    <button class="diff-btn" id="diff-hard" onclick="setDiff('hard')">HARD — 15s</button>
+  </div>
+  <div class="section-title">SELECT PUZZLE TYPE</div>
+  <div class="puzzle-grid">
+    <div class="puzzle-card" onclick="startGame('morse')">
+      <div class="puzzle-icon">•−</div>
+      <div class="puzzle-name">MORSE CODE</div>
+      <div class="puzzle-desc">Decode dot-dash signals</div>
+      <span class="badge available">AVAILABLE</span>
+    </div>
+    <div class="puzzle-card" onclick="startGame('anagram')">
+      <div class="puzzle-icon">ABC</div>
+      <div class="puzzle-name">ANAGRAM</div>
+      <div class="puzzle-desc">Unscramble letter tiles</div>
+      <span class="badge available">AVAILABLE</span>
+    </div>
+    <div class="puzzle-card" onclick="startGame('caesar')">
+      <div class="puzzle-icon">+3</div>
+      <div class="puzzle-name">CAESAR CIPHER</div>
+      <div class="puzzle-desc">Reverse the letter shift</div>
+      <span class="badge available">AVAILABLE</span>
+    </div>
+    <div class="puzzle-card" onclick="startGame('binary')">
+      <div class="puzzle-icon">01</div>
+      <div class="puzzle-name">BINARY</div>
+      <div class="puzzle-desc">Convert 8-bit groups</div>
+      <span class="badge available">AVAILABLE</span>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+  <div class="game-header">
+    <div>
+      <button class="back-btn" style="margin:0" onclick="quitGame()">← QUIT</button>
+      <div class="game-type-label" id="game-type-label">MORSE CODE</div>
+    </div>
+    <div class="score-area">
+      <div><div class="score-label">SCORE</div><div class="score-val" id="score-display">0</div></div>
+      <div class="timer" id="timer-display">30</div>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+  <!-- MORSE UI -->
+  <div id="morse-ui">
+    <div class="cipher-box">
+      <div class="cipher-label">DECODE THIS MESSAGE</div>
+      <div class="cipher-text" id="cipher-display"></div>
+    </div>
+    <div class="ref-box">
+      <div class="ref-title">MORSE REFERENCE</div>
+      <div class="morse-ref-grid" id="morse-ref-grid"></div>
+    </div>
+    <input class="answer-input" id="answer-input" type="text" placeholder="TYPE YOUR ANSWER..." autocomplete="off" />
+    <div class="hint-row">
+      <div class="hint-text" id="morse-hint-text"></div>
+      <button class="hint-btn" onclick="showHint('morse')">HINT −10pts</button>
+    </div>
+    <button class="submit-btn" onclick="checkMorse()">SUBMIT ↵</button>
+  </div>
+
+  <!-- ANAGRAM UI -->
+  <div id="anagram-ui" style="display:none">
+    <div class="anagram-category" id="anagram-category"></div>
+    <div class="tile-label">YOUR ANSWER</div>
+    <div class="tile-answer-row" id="tile-answer"><span class="tile-answer-placeholder">TAP TILES BELOW</span></div>
+    <div class="tile-label" style="margin-top:4px">AVAILABLE LETTERS</div>
+    <div class="tile-pool-row" id="tile-pool"></div>
+    <div class="hint-row">
+      <div class="hint-text" id="anagram-hint-text"></div>
+      <button class="hint-btn" onclick="showHint('anagram')">HINT −10pts</button>
+    </div>
+    <div class="tile-controls">
+      <button class="tile-btn" onclick="clearAnswer()">✕ CLEAR</button>
+      <button class="tile-btn" onclick="shuffleTiles()">⟳ SHUFFLE</button>
+      <button class="tile-btn green" onclick="checkAnagram()">✓ SUBMIT</button>
+    </div>
+  </div>
+
+  <!-- CAESAR UI -->
+  <div id="caesar-ui" style="display:none">
+    <div class="cipher-box">
+      <div class="cipher-label" id="caesar-shift-label">SHIFT +3 — REVERSE IT</div>
+      <div class="cipher-text" id="caesar-display"></div>
+    </div>
+    <div class="ref-box">
+      <div class="ref-title">SHIFT REFERENCE</div>
+      <div id="caesar-ref-grid"></div>
+    </div>
+    <input class="answer-input" id="caesar-input" type="text" placeholder="TYPE DECODED MESSAGE..." autocomplete="off" />
+    <div class="hint-row">
+      <div class="hint-text" id="caesar-hint-text"></div>
+      <button class="hint-btn" onclick="showHint('caesar')">HINT −10pts</button>
+    </div>
+    <button class="submit-btn" onclick="checkCaesar()">SUBMIT ↵</button>
+  </div>
+
+  <!-- BINARY UI -->
+  <div id="binary-ui" style="display:none">
+    <div class="cipher-box">
+      <div class="cipher-label">DECODE BINARY — 8 BITS PER LETTER</div>
+      <div class="cipher-text" id="binary-display" style="font-size:12px; letter-spacing:2px; line-height:2.2;"></div>
+    </div>
+    <div class="ref-box">
+      <div class="ref-title">BINARY REFERENCE (A–Z)</div>
+      <div id="binary-ref-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:3px; font-size:9px;"></div>
+    </div>
+    <input class="answer-input" id="binary-input" type="text" placeholder="TYPE DECODED WORD..." autocomplete="off" />
+    <div class="hint-row">
+      <div class="hint-text" id="binary-hint-text"></div>
+      <button class="hint-btn" onclick="showHint('binary')">HINT −10pts</button>
+    </div>
+    <button class="submit-btn" onclick="checkBinary()">SUBMIT ↵</button>
+  </div>
+
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="pixel-art">★</div>
+  <div class="result-score" id="final-score">0</div>
+  <div class="result-label">FINAL SCORE</div>
+  <div id="new-record-msg" class="new-record" style="display:none">★ NEW RECORD ★</div>
+  <div class="stats-row">
+    <div class="stat-item"><div class="stat-num" id="stat-correct">0</div><div class="stat-lbl">CORRECT</div></div>
+    <div class="stat-item"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">TOTAL</div></div>
+    <div class="stat-item"><div class="stat-num" id="stat-time">0s</div><div class="stat-lbl">AVG TIME</div></div>
+  </div>
+  <button class="menu-btn green" id="play-again-btn" style="margin-bottom:9px">↺ PLAY AGAIN</button>
+  <button class="menu-btn blue" onclick="showScreen('leaderboard'); renderLeaderboard()">⊞ LEADERBOARD</button>
+  <button class="menu-btn" onclick="showScreen('menu')">⌂ MAIN MENU</button>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboard" class="screen">
+  <button class="back-btn" onclick="showScreen('menu')">← BACK</button>
+  <div class="section-title">LEADERBOARD</div>
+  <div class="lb-tabs">
+    <button class="lb-tab active" id="tab-decoder" onclick="switchLbTab('decoder')">DECODERS</button>
+    <button class="lb-tab gold-tab" id="tab-encoder" onclick="switchLbTab('encoder')">ENCODERS</button>
+  </div>
+  <div class="lb-filter" id="lb-filter"></div>
+  <div class="lb-list" id="lb-list"></div>
+</div>
+
+<!-- ENCODER PLATFORM -->
+<div id="encoder" class="screen">
+  <button class="back-btn" onclick="showScreen('menu')">← BACK</button>
+  <div class="section-title">ENCODER PLATFORM</div>
+
+  <div class="enc-step active" id="enc-step-1">
+    <div style="font-size:10px; color:#555; letter-spacing:1px; margin-bottom:1rem;">Pick a puzzle type and submit a word or phrase. You earn points every time a decoder fails to crack your code. The harder they find it, the more you earn.</div>
+    <div class="enc-type-grid">
+      <div class="enc-type-card" onclick="selectEncType('morse')" id="enc-morse">
+        <div class="enc-type-icon">•−</div>
+        <div class="enc-type-name">MORSE</div>
+      </div>
+      <div class="enc-type-card" onclick="selectEncType('anagram')" id="enc-anagram">
+        <div class="enc-type-icon">ABC</div>
+        <div class="enc-type-name">ANAGRAM</div>
+      </div>
+      <div class="enc-type-card" onclick="selectEncType('caesar')" id="enc-caesar">
+        <div class="enc-type-icon">+3</div>
+        <div class="enc-type-name">CAESAR</div>
+      </div>
+      <div class="enc-type-card" onclick="selectEncType('binary')" id="enc-binary">
+        <div class="enc-type-icon">01</div>
+        <div class="enc-type-name">BINARY</div>
+      </div>
+    </div>
+    <div class="enc-label">YOUR WORD OR PHRASE</div>
+    <input class="enc-input" id="enc-word-input" placeholder="TYPE HERE..." maxlength="20" autocomplete="off" oninput="updateEncPreview()" />
+    <div class="enc-preview-box" id="enc-preview-box" style="display:none">
+      <div class="enc-preview-label">ENCODED PREVIEW</div>
+      <div class="enc-preview-text" id="enc-preview-text"></div>
+    </div>
+    <div class="enc-label">HINT FOR DECODERS (OPTIONAL)</div>
+    <input class="enc-hint-input" id="enc-hint-input" placeholder="Give a clue..." maxlength="40" autocomplete="off" />
+    <button class="enc-btn gold" onclick="submitPuzzle()">SUBMIT PUZZLE ↵</button>
+  </div>
+
+  <div class="enc-step" id="enc-step-2">
+    <div class="enc-success">
+      <div class="enc-success-icon">✓</div>
+      <div class="enc-success-title">PUZZLE SUBMITTED!</div>
+      <div class="enc-success-sub">Decoders will now attempt your puzzle.<br>You earn points for every failed attempt.</div>
+      <div class="enc-stats-row">
+        <div class="stat-item"><div class="stat-num" id="enc-stat-submitted" style="color:#c9a84c">0</div><div class="stat-lbl">SUBMITTED</div></div>
+        <div class="stat-item"><div class="stat-num" id="enc-stat-points" style="color:#c9a84c">0</div><div class="stat-lbl">ENC POINTS</div></div>
+      </div>
+      <button class="enc-btn gold" onclick="resetEncoder()">+ SUBMIT ANOTHER</button>
+      <button class="enc-btn green" style="margin-top:8px" onclick="showScreen('menu')">⌂ MAIN MENU</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end #app -->
+
+<script>
+// ── AUDIO ──
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
+function getAudio() { if (!audioCtx) audioCtx = new AudioCtx(); return audioCtx; }
+function beep(freq, dur, type='square', vol=0.15) {
+  try {
+    const ctx = getAudio();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    o.start(); o.stop(ctx.currentTime + dur);
+  } catch(e) {}
+}
+function playCorrect() { beep(880,0.1); setTimeout(()=>beep(1100,0.15),100); }
+function playWrong()   { beep(180,0.3,'sawtooth',0.1); }
+function playTick()    { beep(440,0.05,'sine',0.08); }
+
+// ── DATA ──
+const MORSE = {A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..'};
+
+const MORSE_EASY = [
+  {word:'SOS',hint:'Universal distress signal'},
+  {word:'HELLO',hint:'Common greeting'},
+  {word:'CODE',hint:'Secret language'},
+  {word:'STAR',hint:'Celestial body in the sky'},
+  {word:'FIRE',hint:'Hot and glowing'},
+  {word:'WAVE',hint:'Motion in water'},
+  {word:'GAME',hint:'What you are playing right now'},
+  {word:'RADIO',hint:'Wireless communication device'},
+];
+const MORSE_HARD = [
+  {word:'SIGNAL',hint:'A transmitted message'},
+  {word:'CIPHER',hint:'A method of encryption'},
+  {word:'FREQUENCY',hint:'Rate of wave repetition'},
+  {word:'TRANSMIT',hint:'Send a signal across'},
+  {word:'DECODE',hint:'Reverse an encryption'},
+  {word:'NETWORK',hint:'Connected system of nodes'},
+];
+
+const ANAGRAM_EASY = [
+  {word:'PLANET',category:'SPACE',hint:'Orbits a star'},
+  {word:'CASTLE',category:'STRUCTURES',hint:'Where royalty lived'},
+  {word:'JUNGLE',category:'NATURE',hint:'Dense tropical forest'},
+  {word:'SPIDER',category:'ANIMALS',hint:'Eight-legged creature'},
+  {word:'CANDLE',category:'OBJECTS',hint:'Provides light when lit'},
+  {word:'SILVER',category:'METALS',hint:'Shiny precious metal'},
+  {word:'WINTER',category:'SEASONS',hint:'Coldest time of year'},
+  {word:'PIRATE',category:'HISTORY',hint:'Sailed the high seas'},
+];
+const ANAGRAM_HARD = [
+  {word:'ALCHEMY',category:'SCIENCE',hint:'Medieval proto-chemistry'},
+  {word:'LABYRINTH',category:'STRUCTURES',hint:'A complex maze'},
+  {word:'SPECTRUM',category:'SCIENCE',hint:'Range of light wavelengths'},
+  {word:'TROPICAL',category:'NATURE',hint:'Near the equator'},
+  {word:'DIPLOMAT',category:'HISTORY',hint:'International relations expert'},
+  {word:'EQUATION',category:'MATH',hint:'Mathematical statement of equality'},
+];
+
+const CAESAR_EASY = [
+  {text:'SHADOW',hint:'Follows you in sunlight'},
+  {text:'FROZEN',hint:'Turned to ice'},
+  {text:'KNIGHT',hint:'Armored warrior on horseback'},
+  {text:'SIGNAL',hint:'A message or warning'},
+  {text:'ROCKET',hint:'Launched into space'},
+  {text:'WINTER',hint:'Coldest season'},
+];
+const CAESAR_HARD = [
+  {text:'BREAK THE CODE',hint:'What you are doing right now'},
+  {text:'SEND HELP NOW',hint:'A distress message'},
+  {text:'THE EAGLE FLIES',hint:'Classic spy code phrase'},
+  {text:'MISSION COMPLETE',hint:'You finished the job'},
+  {text:'SEEK THE TRUTH',hint:'A philosophical command'},
+  {text:'DARK AND STORMY',hint:'Classic opening line'},
+];
+
+const BINARY_EASY = [
+  {word:'CAT',hint:'Common household pet'},
+  {word:'DOG',hint:'Man\'s best friend'},
+  {word:'SUN',hint:'Center of our solar system'},
+  {word:'KEY',hint:'Opens a lock'},
+  {word:'FOX',hint:'Clever orange animal'},
+  {word:'BIT',hint:'Smallest unit of data'},
+  {word:'MAP',hint:'Shows you where to go'},
+  {word:'NET',hint:'Catches fish or connects computers'},
+];
+const BINARY_HARD = [
+  {word:'MATRIX',hint:'A rectangular array of numbers'},
+  {word:'KERNEL',hint:'Core of an operating system'},
+  {word:'SYNTAX',hint:'Rules of a programming language'},
+  {word:'BUFFER',hint:'Temporary data storage'},
+  {word:'VECTOR',hint:'Quantity with direction and magnitude'},
+  {word:'CIPHER',hint:'Encryption method'},
+];
+
+// ── STATE ──
+let difficulty = 'easy';
+let currentGameType = 'morse';
+let isDaily = false;
+let state = {};
+let anagramAnswer = [], anagramPool = [], tileUsed = [];
+let usedIndices = [];
+let encType = null;
+let lbTab = 'decoder';
+let lbFilter = 'all';
+
+// ── STORAGE ──
+function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; } }
+function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+
+function getPlayerName() { return load('cq_name','PLAYER'); }
+function saveName() {
+  const v = document.getElementById('name-input').value.trim().toUpperCase() || 'PLAYER';
+  save('cq_name', v);
+  document.getElementById('name-modal').classList.remove('active');
+  document.getElementById('menu-player-name').textContent = 'PLAYING AS: ' + v;
+}
+
+function getDecoderBoard() { return load('cq_decoder_board', []); }
+function saveDecoderScore(type, diff, score, rounds) {
+  const board = getDecoderBoard();
+  board.push({ name: getPlayerName(), type, diff, score, rounds, date: Date.now() });
+  board.sort((a,b) => b.score - a.score);
+  save('cq_decoder_board', board.slice(0, 100));
+}
+function getPersonalBest(type, diff) {
+  return getDecoderBoard().filter(e => e.name === getPlayerName() && e.type === type && e.diff === diff)
+    .reduce((m,e) => Math.max(m, e.score), 0);
+}
+
+function getEncoderBoard() { return load('cq_encoder_board', []); }
+function getEncoderPuzzles() { return load('cq_encoder_puzzles', []); }
+function saveEncoderPuzzle(puzzle) {
+  const puzzles = getEncoderPuzzles();
+  puzzles.unshift(puzzle);
+  save('cq_encoder_puzzles', puzzles.slice(0, 50));
+}
+function addEncoderPoints(encoderName, pts) {
+  const board = getEncoderBoard();
+  const idx = board.findIndex(e => e.name === encoderName);
+  if (idx >= 0) { board[idx].points += pts; board[idx].stumped += 1; }
+  else board.push({ name: encoderName, points: pts, stumped: 1, submitted: 1 });
+  board.sort((a,b) => b.points - a.points);
+  save('cq_encoder_board', board.slice(0, 100));
+}
+function incrementEncoderSubmitted(name) {
+  const board = getEncoderBoard();
+  const idx = board.findIndex(e => e.name === name);
+  if (idx >= 0) board[idx].submitted = (board[idx].submitted||0) + 1;
+  else board.push({ name, points: 0, stumped: 0, submitted: 1 });
+  save('cq_encoder_board', board);
+}
+
+// ── SCREENS ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showHowToPlay() {
+  alert(
+    'CIPHERQUEST — HOW TO PLAY\n\n' +
+    'DECODER: Decode encrypted messages before time runs out.\n' +
+    '  • Morse Code: Use the reference chart to decode dots & dashes.\n' +
+    '  • Anagram: Tap letter tiles to build the hidden word.\n' +
+    '  • Caesar Cipher: Reverse the shift number to decode.\n' +
+    '  • Binary: Convert 8-bit groups into letters.\n\n' +
+    'SCORING: Time remaining × 3 pts. Hints cost 10 pts.\n' +
+    'EASY: 30 seconds. HARD: 15 seconds + longer words.\n\n' +
+    'ENCODER: Submit your own puzzles.\n' +
+    'You earn points every time a decoder FAILS your puzzle.\n' +
+    'Harder puzzles = more encoder points!'
+  );
+}
+
+// ── DIFFICULTY ──
+function setDiff(d) {
+  difficulty = d;
+  document.getElementById('diff-easy').className = 'diff-btn' + (d==='easy'?' active-easy':'');
+  document.getElementById('diff-hard').className = 'diff-btn' + (d==='hard'?' active-hard':'');
+}
+
+// ── DAILY CHALLENGE ──
+function getDailySeed() {
+  const d = new Date();
+  return d.getFullYear()*10000 + (d.getMonth()+1)*100 + d.getDate();
+}
+function seededRandom(seed) {
+  let s = seed;
+  return function() { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+function showDailyChallenge() {
+  const todayKey = 'cq_daily_' + getDailySeed();
+  const done = load(todayKey, false);
+  if (done) { alert('You already completed today\'s Daily Challenge!\nCome back tomorrow for a new one.'); return; }
+  isDaily = true;
+  difficulty = 'easy';
+  const types = ['morse','anagram','caesar','binary'];
+  const rng = seededRandom(getDailySeed());
+  currentGameType = types[Math.floor(rng() * types.length)];
+  startGame(currentGameType, true);
+}
+
+// ── GAME CORE ──
+function toMorse(word) { return word.split('').map(c => MORSE[c]||c).join(' '); }
+function toBinary(word) { return word.split('').map(c => c===' '?'00100000':c.charCodeAt(0).toString(2).padStart(8,'0')).join(' '); }
+function caesarShift(text, shift) {
+  return text.split('').map(c => {
+    if(c===' ') return ' ';
+    return String.fromCharCode(((c.charCodeAt(0)-65+shift+26)%26)+65);
+  }).join('');
+}
+
+// ── NEW CIPHER ENGINES ──
+
+function toAtbash(word) {
+  return word.toUpperCase().split('').map(c => {
+    if (!/[A-Z]/.test(c)) return c;
+    return String.fromCharCode(90 - (c.charCodeAt(0) - 65));
+  }).join('');
+}
+
+function toVigenere(word, keyword) {
+  const key = keyword.toUpperCase().replace(/[^A-Z]/g, '');
+  let ki = 0;
+  return word.toUpperCase().split('').map(c => {
+    if (c === ' ') return ' ';
+    if (!/[A-Z]/.test(c)) return c;
+    const shift = key.charCodeAt(ki % key.length) - 65;
+    ki++;
+    return String.fromCharCode(((c.charCodeAt(0) - 65 + shift) % 26) + 65);
+  }).join('');
+}
+
+function toRailFence(word, rails) {
+  const fence = Array.from({length: rails}, () => []);
+  let rail = 0, dir = 1;
+  for (const c of word.toUpperCase()) {
+    fence[rail].push(c);
+    if (rail === 0) dir = 1;
+    if (rail === rails - 1) dir = -1;
+    rail += dir;
+  }
+  return fence.map(r => r.join('')).join(' ');
+}
+
+function toPolybius(word) {
+  // 5×5 grid A-Z with I/J sharing cell (no J in grid)
+  const grid = 'ABCDEFGHIKLMNOPQRSTUVWXYZ';
+  return word.toUpperCase().split('').map(c => {
+    if (c === ' ') return ' ';
+    const ch = c === 'J' ? 'I' : c;
+    const idx = grid.indexOf(ch);
+    if (idx === -1) return c;
+    return `${Math.floor(idx / 5) + 1}${(idx % 5) + 1}`;
+  }).join(' ');
+}
+
+function toColumnar(word, keyword) {
+  const key = keyword.toUpperCase().replace(/[^A-Z]/g, '');
+  const numCols = key.length;
+  const text = word.toUpperCase().replace(/ /g, 'X');
+  const padded = text.padEnd(Math.ceil(text.length / numCols) * numCols, 'X');
+  const numRows = padded.length / numCols;
+  const grid = [];
+  for (let r = 0; r < numRows; r++) {
+    grid.push(padded.slice(r * numCols, (r + 1) * numCols).split(''));
+  }
+  const order = [...key].map((c, i) => ({c, i}))
+    .sort((a, b) => a.c.localeCompare(b.c)).map(x => x.i);
+  return order.map(col => grid.map(row => row[col]).join('')).join(' ');
+}
+
+function toPigpenSVG(letter) {
+  const sz = 24, h = 12, pad = 4, r = sz - pad;
+  const st = `stroke="#eee" stroke-width="2.5" stroke-linecap="round" fill="none"`;
+  // Grid letters A–R: [top, right, bottom, left, hasDot]
+  const G = {
+    A:[0,1,1,0,0], B:[0,1,1,1,0], C:[0,0,1,1,0],
+    D:[1,1,1,0,0], E:[1,1,1,1,0], F:[1,0,1,1,0],
+    G:[1,1,0,0,0], H:[1,1,0,1,0], I:[1,0,0,1,0],
+    J:[0,1,1,0,1], K:[0,1,1,1,1], L:[0,0,1,1,1],
+    M:[1,1,1,0,1], N:[1,1,1,1,1], O:[1,0,1,1,1],
+    P:[1,1,0,0,1], Q:[1,1,0,1,1], R:[1,0,0,1,1],
+  };
+  // X-pattern letters S–Z: [topLeft, topRight, bottomRight, bottomLeft, hasDot]
+  const X = {
+    S:[1,0,0,0,0], T:[0,1,0,0,0], U:[0,0,1,0,0], V:[0,0,0,1,0],
+    W:[1,0,0,0,1], X:[0,1,0,0,1], Y:[0,0,1,0,1], Z:[0,0,0,1,1],
+  };
+  let inner = '';
+  const vb = `0 0 ${sz} ${sz}`;
+  const wrap = content =>
+    `<svg viewBox="${vb}" width="${sz}" height="${sz}" style="display:inline-block;vertical-align:middle;margin:3px">${content}</svg>`;
+
+  if (letter === ' ') return wrap('');
+  if (G[letter]) {
+    const [top, right, bottom, left, dot] = G[letter];
+    if (top)    inner += `<line x1="${pad}" y1="${pad}" x2="${r}" y2="${pad}" ${st}/>`;
+    if (right)  inner += `<line x1="${r}" y1="${pad}" x2="${r}" y2="${r}" ${st}/>`;
+    if (bottom) inner += `<line x1="${pad}" y1="${r}" x2="${r}" y2="${r}" ${st}/>`;
+    if (left)   inner += `<line x1="${pad}" y1="${pad}" x2="${pad}" y2="${r}" ${st}/>`;
+    if (dot)    inner += `<circle cx="${h}" cy="${h}" r="2.5" fill="#eee"/>`;
+  } else if (X[letter]) {
+    const [tl, tr, br, bl, dot] = X[letter];
+    if (tl) inner += `<line x1="${pad}" y1="${pad}" x2="${h}" y2="${h}" ${st}/>`;
+    if (tr) inner += `<line x1="${r}" y1="${pad}" x2="${h}" y2="${h}" ${st}/>`;
+    if (br) inner += `<line x1="${h}" y1="${h}" x2="${r}" y2="${r}" ${st}/>`;
+    if (bl) inner += `<line x1="${h}" y1="${h}" x2="${pad}" y2="${r}" ${st}/>`;
+    if (dot) inner += `<circle cx="${h}" cy="${h}" r="2.5" fill="#eee"/>`;
+  }
+  return wrap(inner);
+}
+
+function toPigpen(word) {
+  return word.toUpperCase().split('').map(toPigpenSVG).join('');
+}
+
+function buildPlayfairGrid(keyword) {
+  const key = keyword.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  const seen = new Set();
+  const grid = [];
+  for (const c of key + 'ABCDEFGHIKLMNOPQRSTUVWXYZ') {
+    if (!seen.has(c)) { seen.add(c); grid.push(c); }
+  }
+  return grid; // 25-element array
+}
+
+function playfairPos(grid, c) {
+  const idx = grid.indexOf(c === 'J' ? 'I' : c);
+  return {row: Math.floor(idx / 5), col: idx % 5};
+}
+
+function toPlayfair(word, keyword) {
+  const grid = buildPlayfairGrid(keyword);
+  const text = word.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+  const digraphs = [];
+  let i = 0;
+  while (i < text.length) {
+    const a = text[i];
+    const b = (i + 1 < text.length && text[i + 1] !== a) ? text[i + 1] : 'X';
+    digraphs.push([a, b]);
+    i += (b === 'X' && (i + 1 >= text.length || text[i + 1] === a)) ? 1 : 2;
+  }
+  return digraphs.map(([a, b]) => {
+    const pa = playfairPos(grid, a), pb = playfairPos(grid, b);
+    let ea, eb;
+    if (pa.row === pb.row) {
+      ea = grid[pa.row * 5 + (pa.col + 1) % 5];
+      eb = grid[pb.row * 5 + (pb.col + 1) % 5];
+    } else if (pa.col === pb.col) {
+      ea = grid[((pa.row + 1) % 5) * 5 + pa.col];
+      eb = grid[((pb.row + 1) % 5) * 5 + pb.col];
+    } else {
+      ea = grid[pa.row * 5 + pb.col];
+      eb = grid[pb.row * 5 + pa.col];
+    }
+    return ea + eb;
+  }).join(' ');
+}
+
+function buildMorseRef() {
+  document.getElementById('morse-ref-grid').innerHTML =
+    Object.entries(MORSE).map(([k,v]) => `<div class="morse-char"><span>${k}</span>${v}</div>`).join('');
+}
+function buildBinaryRef() {
+  document.getElementById('binary-ref-grid').innerHTML =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c =>
+      `<div style="display:flex;justify-content:space-between;padding:1px 4px;color:#444">
+        <span style="color:#888;font-weight:bold">${c}</span>
+        <span>${c.charCodeAt(0).toString(2).padStart(8,'0')}</span>
+      </div>`
+    ).join('');
+}
+function buildCaesarRef(shift) {
+  document.getElementById('caesar-ref-grid').innerHTML =
+    `<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:3px;font-size:10px;text-align:center">` +
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => {
+      const enc = caesarShift(c, shift);
+      return `<div><span style="color:#888;font-weight:bold">${enc}</span><span style="color:#444">→${c}</span></div>`;
+    }).join('') + `</div>`;
+}
+
+function getWordPool(type) {
+  if (type==='morse')   return difficulty==='hard' ? MORSE_HARD   : MORSE_EASY;
+  if (type==='anagram') return difficulty==='hard' ? ANAGRAM_HARD : ANAGRAM_EASY;
+  if (type==='caesar')  return difficulty==='hard' ? CAESAR_HARD  : CAESAR_EASY;
+  if (type==='binary')  return difficulty==='hard' ? BINARY_HARD  : BINARY_EASY;
+  return [];
+}
+
+function startGame(type, daily=false) {
+  clearInterval(state.timer);
+  currentGameType = type;
+  isDaily = daily;
+  usedIndices = [];
+  const timeLimit = difficulty==='hard' ? 15 : 30;
+  state = { score:0, round:0, totalRounds:5, timer:null, timeLeft:timeLimit, timeLimit, correct:0, totalTime:0, hintUsed:false, currentWord:'', caesarShift:0 };
+  const labels = {morse:'MORSE CODE',anagram:'ANAGRAM',caesar:'CAESAR CIPHER',binary:'BINARY'};
+  let labelHtml = labels[type];
+  if (daily) labelHtml += '<span class="daily-badge">DAILY</span>';
+  else labelHtml += `<span class="diff-badge ${difficulty}">${difficulty.toUpperCase()}</span>`;
+  document.getElementById('game-type-label').innerHTML = labelHtml;
+  ['morse','anagram','caesar','binary'].forEach(t =>
+    document.getElementById(t+'-ui').style.display = t===type ? 'block' : 'none'
+  );
+  document.getElementById('play-again-btn').onclick = () => startGame(type);
+  if (type==='morse') buildMorseRef();
+  if (type==='binary') buildBinaryRef();
+  showScreen('game');
+  nextRound();
+}
+
+function pickUnused(arr) {
+  const pool = getWordPool(currentGameType);
+  // Also mix in encoder-submitted puzzles
+  const encPuzzles = getEncoderPuzzles().filter(p => p.type === currentGameType);
+  const combined = [...pool, ...encPuzzles.map(p => ({
+    word: p.word || p.text, text: p.word || p.text,
+    hint: p.hint || 'Submitted by ' + p.encoder,
+    category: 'COMMUNITY', _encoder: p.encoder, _id: p.id
+  }))];
+  const available = combined.map((_,i)=>i).filter(i=>!usedIndices.includes(i));
+  if (available.length === 0) { usedIndices = []; return {item: combined[0], idx:0}; }
+  const idx = available[Math.floor(Math.random()*available.length)];
+  usedIndices.push(idx);
+  return {item: combined[idx], idx};
+}
+
+function nextRound() {
+  if (state.round >= state.totalRounds) { endGame(); return; }
+  state.round++;
+  state.hintUsed = false;
+  state.timeLeft = state.timeLimit;
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('score-display').textContent = state.score;
+  document.getElementById('progress-fill').style.width = ((state.round-1)/state.totalRounds*100)+'%';
+  if (currentGameType==='morse')   setupMorseRound();
+  else if (currentGameType==='anagram') setupAnagramRound();
+  else if (currentGameType==='caesar')  setupCaesarRound();
+  else setupBinaryRound();
+  startTimer();
+}
+
+function setupMorseRound() {
+  const {item} = pickUnused();
+  state.currentWord = item.word || item.text;
+  state.currentHint = item.hint;
+  state._encoder = item._encoder;
+  document.getElementById('cipher-display').textContent = toMorse(state.currentWord);
+  document.getElementById('answer-input').value = '';
+  document.getElementById('answer-input').className = 'answer-input';
+  document.getElementById('morse-hint-text').textContent = '';
+}
+function setupAnagramRound() {
+  const {item} = pickUnused();
+  state.currentWord = item.word || item.text;
+  state.currentHint = item.hint;
+  state._encoder = item._encoder;
+  document.getElementById('anagram-category').textContent = 'CATEGORY: ' + (item.category||'COMMUNITY');
+  document.getElementById('anagram-hint-text').textContent = '';
+  anagramAnswer = [];
+  anagramPool = state.currentWord.split('').sort(() => Math.random()-0.5);
+  while (anagramPool.join('')===state.currentWord) anagramPool.sort(()=>Math.random()-0.5);
+  tileUsed = new Array(anagramPool.length).fill(false);
+  renderTiles();
+}
+function setupCaesarRound() {
+  const {item} = pickUnused();
+  state.currentWord = item.text || item.word;
+  state.currentHint = item.hint;
+  state._encoder = item._encoder;
+  const shift = Math.floor(Math.random()*8)+2;
+  state.caesarShift = shift;
+  document.getElementById('caesar-display').textContent = caesarShift(state.currentWord, shift);
+  document.getElementById('caesar-shift-label').textContent = 'SHIFT: +' + shift + ' — REVERSE IT';
+  document.getElementById('caesar-input').value = '';
+  document.getElementById('caesar-input').className = 'answer-input';
+  document.getElementById('caesar-hint-text').textContent = '';
+  buildCaesarRef(shift);
+}
+function setupBinaryRound() {
+  const {item} = pickUnused();
+  state.currentWord = item.word || item.text;
+  state.currentHint = item.hint;
+  state._encoder = item._encoder;
+  document.getElementById('binary-display').textContent = toBinary(state.currentWord);
+  document.getElementById('binary-input').value = '';
+  document.getElementById('binary-input').className = 'answer-input';
+  document.getElementById('binary-hint-text').textContent = '';
+}
+
+// ── TILES ──
+function renderTiles() {
+  document.getElementById('tile-pool').innerHTML = anagramPool.map((l,i) =>
+    `<div class="tile${tileUsed[i]?' used':''}" onclick="pickTile(${i})">${l}</div>`).join('');
+  const ansEl = document.getElementById('tile-answer');
+  ansEl.innerHTML = anagramAnswer.length===0
+    ? '<span class="tile-answer-placeholder">TAP TILES BELOW</span>'
+    : anagramAnswer.map((t,i) => `<div class="tile in-answer" onclick="unpickTile(${i})">${t.letter}</div>`).join('');
+}
+function pickTile(i) { if(tileUsed[i]) return; tileUsed[i]=true; anagramAnswer.push({letter:anagramPool[i],poolIdx:i}); renderTiles(); }
+function unpickTile(i) { tileUsed[anagramAnswer[i].poolIdx]=false; anagramAnswer.splice(i,1); renderTiles(); }
+function clearAnswer() { anagramAnswer.forEach(t=>tileUsed[t.poolIdx]=false); anagramAnswer=[]; renderTiles(); }
+function shuffleTiles() { anagramPool.sort(()=>Math.random()-0.5); tileUsed=new Array(anagramPool.length).fill(false); anagramAnswer=[]; renderTiles(); }
+
+// ── TIMER ──
+function startTimer() {
+  clearInterval(state.timer);
+  updateTimer();
+  state.timer = setInterval(() => {
+    state.timeLeft--;
+    updateTimer();
+    if (state.timeLeft <= 5 && state.timeLeft > 0) playTick();
+    if (state.timeLeft <= 0) { clearInterval(state.timer); timeUp(); }
+  }, 1000);
+}
+function updateTimer() {
+  const el = document.getElementById('timer-display');
+  el.textContent = state.timeLeft;
+  el.className = 'timer' + (state.timeLeft<=5?' warning':'');
+}
+
+// ── HINT ──
+function showHint(type) {
+  if (state.hintUsed) return;
+  state.hintUsed = true;
+  const ids = {morse:'morse-hint-text',anagram:'anagram-hint-text',caesar:'caesar-hint-text',binary:'binary-hint-text'};
+  document.getElementById(ids[type]).textContent = '💡 ' + state.currentHint;
+}
+
+// ── CHECK ANSWERS ──
+function checkMorse() {
+  const val = document.getElementById('answer-input').value.trim().toUpperCase();
+  if (!val) return;
+  clearInterval(state.timer);
+  const correct = val===state.currentWord;
+  document.getElementById('answer-input').className = 'answer-input '+(correct?'correct':'wrong');
+  resolveRound(correct);
+}
+function checkAnagram() {
+  const val = anagramAnswer.map(t=>t.letter).join('');
+  if (!val) return;
+  clearInterval(state.timer);
+  const correct = val===state.currentWord;
+  document.querySelectorAll('#tile-answer .tile').forEach(t=>t.className='tile '+(correct?'correct-flash':'wrong-flash'));
+  resolveRound(correct);
+}
+function checkCaesar() {
+  const val = document.getElementById('caesar-input').value.trim().toUpperCase();
+  if (!val) return;
+  clearInterval(state.timer);
+  const correct = val===state.currentWord;
+  document.getElementById('caesar-input').className = 'answer-input '+(correct?'correct':'wrong');
+  resolveRound(correct);
+}
+function checkBinary() {
+  const val = document.getElementById('binary-input').value.trim().toUpperCase();
+  if (!val) return;
+  clearInterval(state.timer);
+  const correct = val===state.currentWord;
+  document.getElementById('binary-input').className = 'answer-input '+(correct?'correct':'wrong');
+  resolveRound(correct);
+}
+
+function resolveRound(correct) {
+  if (correct) {
+    const pts = Math.max(10, state.timeLeft*3) - (state.hintUsed?10:0);
+    state.score += pts;
+    state.correct++;
+    showFeedback(true, '+'+pts+' pts — CORRECT!');
+    playCorrect();
+  } else {
+    showFeedback(false, 'WRONG — Answer: '+state.currentWord);
+    playWrong();
+    // If this was an encoder puzzle, reward the encoder
+    if (state._encoder) addEncoderPoints(state._encoder, 15);
+  }
+  state.totalTime += (state.timeLimit - state.timeLeft);
+  setTimeout(()=>nextRound(), 1600);
+}
+
+function timeUp() {
+  showFeedback(false, "TIME'S UP — Answer: "+state.currentWord);
+  playWrong();
+  if (state._encoder) addEncoderPoints(state._encoder, 15);
+  state.totalTime += state.timeLimit;
+  setTimeout(()=>nextRound(), 1800);
+}
+
+function showFeedback(correct, msg) {
+  const el = document.getElementById('feedback');
+  el.textContent = msg;
+  el.className = 'feedback '+(correct?'correct':'wrong');
+}
+
+function quitGame() { clearInterval(state.timer); showScreen('puzzle-select'); }
+
+// ── END GAME ──
+function endGame() {
+  const prev = getPersonalBest(currentGameType, difficulty);
+  const isNew = state.score > prev && state.score > 0;
+  saveDecoderScore(currentGameType, difficulty, state.score, state.totalRounds);
+  if (isDaily) {
+    save('cq_daily_'+getDailySeed(), true);
+    isDaily = false;
+  }
+  document.getElementById('final-score').textContent = state.score;
+  document.getElementById('stat-correct').textContent = state.correct;
+  document.getElementById('stat-total').textContent = state.totalRounds;
+  document.getElementById('stat-time').textContent = Math.round(state.totalTime/state.totalRounds)+'s';
+  document.getElementById('new-record-msg').style.display = isNew ? 'block' : 'none';
+  if (isNew) beep(1200,0.4,'sine',0.2);
+  showScreen('result');
+}
+
+// ── LEADERBOARD ──
+function switchLbTab(tab) {
+  lbTab = tab;
+  lbFilter = 'all';
+  document.getElementById('tab-decoder').className = 'lb-tab'+(tab==='decoder'?' active':'');
+  document.getElementById('tab-encoder').className = 'lb-tab gold-tab'+(tab==='encoder'?' active':'');
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  const filterEl = document.getElementById('lb-filter');
+  const listEl = document.getElementById('lb-list');
+
+  if (lbTab==='decoder') {
+    filterEl.innerHTML = ['all','morse','anagram','caesar','binary'].map(f =>
+      `<button class="lb-filter-btn${lbFilter===f?' active':''}" onclick="setLbFilter('${f}')">${f.toUpperCase()}</button>`
+    ).join('');
+    const board = getDecoderBoard().filter(e => lbFilter==='all' || e.type===lbFilter);
+    if (board.length===0) { listEl.innerHTML='<div class="lb-empty">NO SCORES YET<br>START PLAYING!</div>'; return; }
+    const ranks = ['🥇','🥈','🥉'];
+    listEl.innerHTML = board.slice(0,20).map((e,i) => `
+      <div class="lb-entry">
+        <div class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${ranks[i]||'#'+(i+1)}</div>
+        <div class="lb-name">${e.name}</div>
+        <div class="lb-meta">${e.type.toUpperCase()}<br>${e.diff.toUpperCase()}</div>
+        <div class="lb-score">${e.score}</div>
+      </div>`).join('');
+  } else {
+    filterEl.innerHTML = '';
+    const board = getEncoderBoard();
+    if (board.length===0) { listEl.innerHTML='<div class="lb-empty">NO ENCODERS YET<br>SUBMIT A PUZZLE!</div>'; return; }
+    const ranks = ['🥇','🥈','🥉'];
+    listEl.innerHTML = board.slice(0,20).map((e,i) => `
+      <div class="lb-entry">
+        <div class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${ranks[i]||'#'+(i+1)}</div>
+        <div class="lb-name">${e.name}</div>
+        <div class="lb-meta">${e.stumped||0} stumped<br>${e.submitted||0} submitted</div>
+        <div class="lb-score gold-score">${e.points}</div>
+      </div>`).join('');
+  }
+}
+
+function setLbFilter(f) { lbFilter=f; renderLeaderboard(); }
+
+// ── ENCODER PLATFORM ──
+function selectEncType(type) {
+  encType = type;
+  document.querySelectorAll('.enc-type-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('enc-'+type).classList.add('selected');
+  updateEncPreview();
+}
+
+function updateEncPreview() {
+  const word = document.getElementById('enc-word-input').value.trim().toUpperCase();
+  const box = document.getElementById('enc-preview-box');
+  const txt = document.getElementById('enc-preview-text');
+  if (!word || !encType) { box.style.display='none'; return; }
+  box.style.display='block';
+  if (encType==='morse')   txt.textContent = toMorse(word);
+  else if (encType==='anagram') txt.textContent = word.split('').sort(()=>Math.random()-0.5).join(' ');
+  else if (encType==='caesar') { const sh=Math.floor(Math.random()*8)+2; txt.textContent=`SHIFT +${sh}: ${caesarShift(word,sh)}`; }
+  else if (encType==='binary') txt.textContent = toBinary(word);
+}
+
+function submitPuzzle() {
+  const word = document.getElementById('enc-word-input').value.trim().toUpperCase();
+  const hint = document.getElementById('enc-hint-input').value.trim();
+  if (!word) { alert('Please enter a word or phrase.'); return; }
+  if (!encType) { alert('Please select a puzzle type.'); return; }
+  if (word.length < 2) { alert('Word must be at least 2 characters.'); return; }
+  const name = getPlayerName();
+  const puzzle = { id: Date.now(), type: encType, word, hint: hint||'No hint provided', encoder: name, solves:0, fails:0, date: Date.now() };
+  saveEncoderPuzzle(puzzle);
+  incrementEncoderSubmitted(name);
+  const board = getEncoderBoard();
+  const enc = board.find(e=>e.name===name);
+  document.getElementById('enc-stat-submitted').textContent = enc ? enc.submitted : 1;
+  document.getElementById('enc-stat-points').textContent = enc ? enc.points : 0;
+  document.getElementById('enc-step-1').classList.remove('active');
+  document.getElementById('enc-step-2').classList.add('active');
+}
+
+function resetEncoder() {
+  encType = null;
+  document.getElementById('enc-word-input').value = '';
+  document.getElementById('enc-hint-input').value = '';
+  document.getElementById('enc-preview-box').style.display = 'none';
+  document.querySelectorAll('.enc-type-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('enc-step-2').classList.remove('active');
+  document.getElementById('enc-step-1').classList.add('active');
+}
+
+// ── KEYBOARD ──
+document.getElementById('answer-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkMorse(); });
+document.getElementById('caesar-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkCaesar(); });
+document.getElementById('binary-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkBinary(); });
+document.getElementById('name-input').addEventListener('keydown',e=>{ if(e.key==='Enter') saveName(); });
+
+// ── INIT ──
+(function init() {
+  const name = getPlayerName();
+  document.getElementById('menu-player-name').textContent = 'PLAYING AS: ' + name;
+  if (name==='PLAYER') {
+    setTimeout(()=>document.getElementById('name-modal').classList.add('active'), 800);
+  }
+})();
+</script>
+</body>
+</html>
