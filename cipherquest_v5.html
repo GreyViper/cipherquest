@@ -1021,7 +1021,7 @@ function showDailyChallenge() {
   if (done) { alert('You already completed today\'s Daily Challenge!\nCome back tomorrow for a new one.'); return; }
   isDaily = true;
   difficulty = 'easy';
-  const types = ['morse','anagram','caesar','binary'];
+  const types = ['morse','anagram','caesar','binary','atbash','vigenere','railfence','polybius','columnar','pigpen','playfair'];
   const rng = seededRandom(getDailySeed());
   currentGameType = types[Math.floor(rng() * types.length)];
   startGame(currentGameType, true);
@@ -1533,7 +1533,7 @@ function setupColumnarRound() {
   buildColumnarRef(state.currentKeyword);
 }
 function checkColumnar() {
-  const val = document.getElementById('columnar-input').value.trim().toUpperCase().replace(/X/g,'');
+  const val = document.getElementById('columnar-input').value.trim().toUpperCase();
   if (!val) return;
   clearInterval(state.timer);
   const correct = val === state.currentWord.replace(/ /g,'');
@@ -1765,7 +1765,7 @@ function renderLeaderboard() {
   const listEl = document.getElementById('lb-list');
 
   if (lbTab==='decoder') {
-    filterEl.innerHTML = ['all','morse','anagram','caesar','binary'].map(f =>
+    filterEl.innerHTML = ['all','morse','anagram','caesar','binary','atbash','vigenere','railfence','polybius','columnar','pigpen','playfair'].map(f =>
       `<button class="lb-filter-btn${lbFilter===f?' active':''}" onclick="setLbFilter('${f}')">${f.toUpperCase()}</button>`
     ).join('');
     const board = getDecoderBoard().filter(e => lbFilter==='all' || e.type===lbFilter);
@@ -1839,7 +1839,7 @@ function updateEncPreview() {
 function validateSubmission(word) {
   if (word.length < 3) return 'Word must be at least 3 letters.';
   if (!/[AEIOU]/.test(word)) return 'Word must contain at least one vowel.';
-  if (/(.)\1{2,}/.test(word)) return 'Word cannot repeat the same letter more than 3 times in a row.';
+  if (/(.)\1{2,}/.test(word)) return 'Word cannot have 3 or more of the same letter in a row.';
   if (/[^A-Z ]/.test(word)) return 'Only letters A–Z and spaces are allowed.';
   return null;
 }
