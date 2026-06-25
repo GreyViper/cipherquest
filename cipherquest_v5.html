@@ -7,7 +7,7 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: monospace; background: #0d0d0d; color: #eee; min-height: 100vh; }
-#app { max-width: 540px; margin: 0 auto; padding: 1.5rem 1rem; min-height: 100vh; }
+#app { max-width: 780px; margin: 0 auto; padding: 1.5rem 1.5rem; min-height: 100vh; }
 .screen { display: none; }
 .screen.active { display: block; }
 
@@ -55,7 +55,7 @@ body { font-family: monospace; background: #0d0d0d; color: #eee; min-height: 100
 .score-area { display: flex; gap: 14px; align-items: center; }
 .score-label { font-size: 10px; color: #444; }
 .score-val { font-size: 15px; font-weight: bold; color: #eee; }
-.timer { font-size: 20px; font-weight: bold; color: #eee; min-width: 32px; text-align: right; }
+.timer { font-size: 26px; font-weight: bold; color: #eee; min-width: 38px; text-align: right; }
 .timer.warning { color: #D85A30; animation: blink 0.5s infinite; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
 .progress-bar { height: 2px; background: #1a1a1a; border-radius: 99px; margin-bottom: 1.2rem; overflow: hidden; }
@@ -68,13 +68,13 @@ body { font-family: monospace; background: #0d0d0d; color: #eee; min-height: 100
 /* ── CIPHER BOX ── */
 .cipher-box { background: #141414; border: 0.5px solid #2a2a2a; border-radius: 10px; padding: 1.2rem; margin-bottom: 0.9rem; text-align: center; }
 .cipher-label { font-size: 9px; letter-spacing: 3px; color: #444; margin-bottom: 10px; }
-.cipher-text { font-size: 16px; font-weight: bold; letter-spacing: 3px; color: #eee; line-height: 1.9; word-break: break-word; }
-.ref-box { background: #111; border-radius: 8px; padding: 0.8rem; margin-bottom: 0.9rem; border: 0.5px solid #222; }
-.ref-title { font-size: 9px; letter-spacing: 3px; color: #444; margin-bottom: 6px; }
-.morse-ref-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; }
-.morse-char { font-size: 9px; color: #444; text-align: center; padding: 2px; }
-.morse-char span { display: block; color: #888; font-size: 10px; font-weight: bold; }
-.answer-input { width: 100%; padding: 11px 14px; background: #141414; border: 1.5px solid #2a2a2a; border-radius: 8px; font-family: monospace; font-size: 15px; color: #eee; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
+.cipher-text { font-size: 22px; font-weight: bold; letter-spacing: 3px; color: #eee; line-height: 1.9; word-break: break-word; }
+.ref-box { background: #1c1c1c; border-radius: 8px; padding: 1rem; margin-bottom: 0.9rem; border: 1px solid #383838; }
+.ref-title { font-size: 10px; letter-spacing: 3px; color: #888; margin-bottom: 8px; }
+.morse-ref-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.morse-char { font-size: 10px; color: #aaa; text-align: center; padding: 3px 2px; }
+.morse-char span { display: block; color: #fff; font-size: 11px; font-weight: bold; }
+.answer-input { width: 100%; padding: 13px 16px; background: #141414; border: 1.5px solid #2a2a2a; border-radius: 8px; font-family: monospace; font-size: 18px; color: #eee; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
 .answer-input:focus { outline: none; border-color: #1D9E75; }
 .answer-input.correct { border-color: #1D9E75; background: #0a2a1e; }
 .answer-input.wrong { border-color: #D85A30; background: #2a0800; }
@@ -187,12 +187,12 @@ body { font-family: monospace; background: #0d0d0d; color: #eee; min-height: 100
 .keyword-display { font-size: 11px; color: #c9a84c; letter-spacing: 3px; text-align: center; margin-bottom: 6px; }
 .keyword-val { font-size: 15px; font-weight: bold; color: #c9a84c; letter-spacing: 4px; }
 .pigpen-display { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; padding: 0.8rem; min-height: 60px; gap: 2px; }
-.rf-visual { font-family: monospace; font-size: 11px; color: #666; letter-spacing: 2px; line-height: 1.8; text-align: center; margin-bottom: 6px; }
-.polybius-ref { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; font-size: 9px; }
-.polybius-cell { text-align: center; padding: 2px; }
-.polybius-cell span { display: block; color: #888; font-size: 10px; font-weight: bold; }
-.playfair-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; font-size: 10px; }
-.playfair-cell { text-align: center; padding: 3px 0; color: #888; border: 0.5px solid #222; border-radius: 2px; }
+.rf-visual { font-family: monospace; font-size: 13px; color: #bbb; letter-spacing: 2px; line-height: 1.8; text-align: center; margin-bottom: 6px; }
+.polybius-ref { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; font-size: 11px; }
+.polybius-cell { text-align: center; padding: 3px; }
+.polybius-cell span { display: block; color: #eee; font-size: 12px; font-weight: bold; }
+.playfair-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; font-size: 12px; }
+.playfair-cell { text-align: center; padding: 4px 0; color: #eee; border: 1px solid #383838; border-radius: 3px; }
 
 .flag-btn { background: none; border: 0.5px solid #2a2a2a; border-radius: 6px; font-size: 9px; color: #333; cursor: pointer; padding: 3px 8px; font-family: monospace; margin-top: 6px; }
 .flag-btn:hover { color: #D85A30; border-color: #D85A30; }
