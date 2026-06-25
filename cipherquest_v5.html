@@ -549,31 +549,74 @@ body { font-family: monospace; background: #0d0d0d; color: #eee; min-height: 100
   <div class="section-title">ENCODER PLATFORM</div>
 
   <div class="enc-step active" id="enc-step-1">
-    <div style="font-size:10px; color:#555; letter-spacing:1px; margin-bottom:1rem;">Pick a puzzle type and submit a word or phrase. You earn points every time a decoder fails to crack your code. The harder they find it, the more you earn.</div>
+    <div style="font-size:10px; color:#555; letter-spacing:1px; margin-bottom:1rem;">Pick a cipher type and submit a word or phrase. You earn points every time a decoder's time runs out on your puzzle. Harder puzzles earn more.</div>
+
+    <div class="enc-label">SUBSTITUTION CIPHERS</div>
     <div class="enc-type-grid">
       <div class="enc-type-card" onclick="selectEncType('morse')" id="enc-morse">
-        <div class="enc-type-icon">•−</div>
-        <div class="enc-type-name">MORSE</div>
+        <div class="enc-type-icon">•−</div><div class="enc-type-name">MORSE</div>
       </div>
-      <div class="enc-type-card" onclick="selectEncType('anagram')" id="enc-anagram">
-        <div class="enc-type-icon">ABC</div>
-        <div class="enc-type-name">ANAGRAM</div>
+      <div class="enc-type-card" onclick="selectEncType('atbash')" id="enc-atbash">
+        <div class="enc-type-icon">A↔Z</div><div class="enc-type-name">ATBASH</div>
       </div>
       <div class="enc-type-card" onclick="selectEncType('caesar')" id="enc-caesar">
-        <div class="enc-type-icon">+3</div>
-        <div class="enc-type-name">CAESAR</div>
+        <div class="enc-type-icon">+3</div><div class="enc-type-name">CAESAR</div>
       </div>
-      <div class="enc-type-card" onclick="selectEncType('binary')" id="enc-binary">
-        <div class="enc-type-icon">01</div>
-        <div class="enc-type-name">BINARY</div>
+      <div class="enc-type-card" onclick="selectEncType('vigenere')" id="enc-vigenere">
+        <div class="enc-type-icon">KEY</div><div class="enc-type-name">VIGENÈRE</div>
+      </div>
+      <div class="enc-type-card" onclick="selectEncType('pigpen')" id="enc-pigpen">
+        <div class="enc-type-icon">⊞</div><div class="enc-type-name">PIGPEN</div>
       </div>
     </div>
+
+    <div class="enc-label" style="margin-top:1rem">TRANSPOSITION CIPHERS</div>
+    <div class="enc-type-grid">
+      <div class="enc-type-card" onclick="selectEncType('anagram')" id="enc-anagram">
+        <div class="enc-type-icon">ABC</div><div class="enc-type-name">ANAGRAM</div>
+      </div>
+      <div class="enc-type-card" onclick="selectEncType('railfence')" id="enc-railfence">
+        <div class="enc-type-icon">≋</div><div class="enc-type-name">RAIL FENCE</div>
+      </div>
+      <div class="enc-type-card" onclick="selectEncType('columnar')" id="enc-columnar">
+        <div class="enc-type-icon">|||</div><div class="enc-type-name">COLUMNAR</div>
+      </div>
+    </div>
+
+    <div class="enc-label" style="margin-top:1rem">GRID / COORDINATE CIPHERS</div>
+    <div class="enc-type-grid">
+      <div class="enc-type-card" onclick="selectEncType('binary')" id="enc-binary">
+        <div class="enc-type-icon">01</div><div class="enc-type-name">BINARY</div>
+      </div>
+      <div class="enc-type-card" onclick="selectEncType('polybius')" id="enc-polybius">
+        <div class="enc-type-icon">##</div><div class="enc-type-name">POLYBIUS</div>
+      </div>
+      <div class="enc-type-card" onclick="selectEncType('playfair')" id="enc-playfair">
+        <div class="enc-type-icon">5×5</div><div class="enc-type-name">PLAYFAIR</div>
+      </div>
+    </div>
+
     <div class="enc-label">YOUR WORD OR PHRASE</div>
     <input class="enc-input" id="enc-word-input" placeholder="TYPE HERE..." maxlength="20" autocomplete="off" oninput="updateEncPreview()" />
+
+    <div id="enc-keyword-row" style="display:none">
+      <div class="enc-label">KEYWORD (REQUIRED)</div>
+      <input class="enc-input" id="enc-keyword-input" placeholder="ENTER KEYWORD..." maxlength="12" autocomplete="off" oninput="updateEncPreview()" style="font-size:13px;margin-top:4px;" />
+    </div>
+
+    <div id="enc-rails-row" style="display:none">
+      <div class="enc-label">NUMBER OF RAILS</div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="diff-btn active-easy" id="enc-rail-2" onclick="setEncRails(2)">2 RAILS</button>
+        <button class="diff-btn" id="enc-rail-3" onclick="setEncRails(3)">3 RAILS</button>
+      </div>
+    </div>
+
     <div class="enc-preview-box" id="enc-preview-box" style="display:none">
       <div class="enc-preview-label">ENCODED PREVIEW</div>
       <div class="enc-preview-text" id="enc-preview-text"></div>
     </div>
+
     <div class="enc-label">HINT FOR DECODERS (OPTIONAL)</div>
     <input class="enc-hint-input" id="enc-hint-input" placeholder="Give a clue..." maxlength="40" autocomplete="off" />
     <button class="enc-btn gold" onclick="submitPuzzle()">SUBMIT PUZZLE ↵</button>
@@ -583,10 +626,11 @@ body { font-family: monospace; background: #0d0d0d; color: #eee; min-height: 100
     <div class="enc-success">
       <div class="enc-success-icon">✓</div>
       <div class="enc-success-title">PUZZLE SUBMITTED!</div>
-      <div class="enc-success-sub">Decoders will now attempt your puzzle.<br>You earn points for every failed attempt.</div>
+      <div class="enc-success-sub">Decoders will now attempt your puzzle.<br>You earn points when their time runs out.</div>
       <div class="enc-stats-row">
         <div class="stat-item"><div class="stat-num" id="enc-stat-submitted" style="color:#c9a84c">0</div><div class="stat-lbl">SUBMITTED</div></div>
         <div class="stat-item"><div class="stat-num" id="enc-stat-points" style="color:#c9a84c">0</div><div class="stat-lbl">ENC POINTS</div></div>
+        <div class="stat-item"><div class="stat-num" id="enc-stat-difficulty" style="color:#c9a84c">—</div><div class="stat-lbl">DIFFICULTY</div></div>
       </div>
       <button class="enc-btn gold" onclick="resetEncoder()">+ SUBMIT ANOTHER</button>
       <button class="enc-btn green" style="margin-top:8px" onclick="showScreen('menu')">⌂ MAIN MENU</button>
@@ -1713,49 +1757,101 @@ function renderLeaderboard() {
 function setLbFilter(f) { lbFilter=f; renderLeaderboard(); }
 
 // ── ENCODER PLATFORM ──
+const KEYWORD_TYPES = ['vigenere','columnar','playfair'];
+const RAILS_TYPES   = ['railfence'];
+let encRails = 2;
+
+function setEncRails(n) {
+  encRails = n;
+  document.getElementById('enc-rail-2').className = 'diff-btn' + (n===2?' active-easy':'');
+  document.getElementById('enc-rail-3').className = 'diff-btn' + (n===3?' active-easy':'');
+  updateEncPreview();
+}
+
 function selectEncType(type) {
   encType = type;
-  document.querySelectorAll('.enc-type-card').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('enc-'+type).classList.add('selected');
+  document.querySelectorAll('.enc-type-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('enc-' + type).classList.add('selected');
+  document.getElementById('enc-keyword-row').style.display = KEYWORD_TYPES.includes(type) ? 'block' : 'none';
+  document.getElementById('enc-rails-row').style.display   = RAILS_TYPES.includes(type)   ? 'block' : 'none';
   updateEncPreview();
 }
 
 function updateEncPreview() {
   const word = document.getElementById('enc-word-input').value.trim().toUpperCase();
+  const keyword = document.getElementById('enc-keyword-input').value.trim().toUpperCase() || 'KEY';
   const box = document.getElementById('enc-preview-box');
   const txt = document.getElementById('enc-preview-text');
-  if (!word || !encType) { box.style.display='none'; return; }
-  box.style.display='block';
-  if (encType==='morse')   txt.textContent = toMorse(word);
-  else if (encType==='anagram') txt.textContent = word.split('').sort(()=>Math.random()-0.5).join(' ');
-  else if (encType==='caesar') { const sh=Math.floor(Math.random()*8)+2; txt.textContent=`SHIFT +${sh}: ${caesarShift(word,sh)}`; }
-  else if (encType==='binary') txt.textContent = toBinary(word);
+  if (!word || !encType) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  if (encType === 'morse')     txt.textContent = toMorse(word);
+  else if (encType === 'atbash')    txt.textContent = toAtbash(word);
+  else if (encType === 'anagram')   txt.textContent = word.split('').sort(() => Math.random() - 0.5).join(' ');
+  else if (encType === 'caesar')    { const sh = Math.floor(Math.random()*8)+2; txt.textContent = `SHIFT +${sh}: ${caesarShift(word,sh)}`; }
+  else if (encType === 'binary')    txt.textContent = toBinary(word);
+  else if (encType === 'vigenere')  txt.textContent = `KEY: ${keyword} → ${toVigenere(word, keyword)}`;
+  else if (encType === 'railfence') txt.textContent = `${encRails} RAILS → ${toRailFence(word, encRails)}`;
+  else if (encType === 'polybius')  txt.textContent = toPolybius(word);
+  else if (encType === 'columnar')  txt.textContent = `KEY: ${keyword} → ${toColumnar(word, keyword)}`;
+  else if (encType === 'pigpen')    txt.innerHTML   = toPigpen(word);
+  else if (encType === 'playfair')  txt.textContent = `KEY: ${keyword} → ${toPlayfair(word, keyword)}`;
+}
+
+function validateSubmission(word) {
+  if (word.length < 3) return 'Word must be at least 3 letters.';
+  if (!/[AEIOU]/.test(word)) return 'Word must contain at least one vowel.';
+  if (/(.)\1{3,}/.test(word)) return 'Word cannot repeat the same letter more than 3 times in a row.';
+  if (/[^A-Z ]/.test(word)) return 'Only letters A–Z and spaces are allowed.';
+  return null;
 }
 
 function submitPuzzle() {
-  const word = document.getElementById('enc-word-input').value.trim().toUpperCase();
-  const hint = document.getElementById('enc-hint-input').value.trim();
-  if (!word) { alert('Please enter a word or phrase.'); return; }
-  if (!encType) { alert('Please select a puzzle type.'); return; }
-  if (word.length < 2) { alert('Word must be at least 2 characters.'); return; }
+  const word    = document.getElementById('enc-word-input').value.trim().toUpperCase();
+  const hint    = document.getElementById('enc-hint-input').value.trim();
+  const keyword = document.getElementById('enc-keyword-input').value.trim().toUpperCase() || 'KEY';
+
+  const err = validateSubmission(word);
+  if (err) { alert(err); return; }
+  if (!encType) { alert('Please select a cipher type.'); return; }
+  if (KEYWORD_TYPES.includes(encType) && keyword.length < 2) {
+    alert('Please enter a keyword of at least 2 letters.'); return;
+  }
+
   const name = getPlayerName();
-  const puzzle = { id: Date.now(), type: encType, word, hint: hint||'No hint provided', encoder: name, solves:0, fails:0, date: Date.now() };
+  const wordLetters = word.replace(/ /g,'');
+  const diff = calcDifficulty(encType, wordLetters.length);
+  const puzzle = {
+    id: Date.now(), type: encType, word, hint: hint || 'No hint provided',
+    encoder: name, solves: 0, fails: 0, totalTime: 0, date: Date.now(),
+    difficulty: diff,
+    ...(KEYWORD_TYPES.includes(encType) && {keyword}),
+    ...(RAILS_TYPES.includes(encType)   && {rails: encRails}),
+  };
   saveEncoderPuzzle(puzzle);
   incrementEncoderSubmitted(name);
+
   const board = getEncoderBoard();
-  const enc = board.find(e=>e.name===name);
-  document.getElementById('enc-stat-submitted').textContent = enc ? enc.submitted : 1;
-  document.getElementById('enc-stat-points').textContent = enc ? enc.points : 0;
+  const enc = board.find(e => e.name === name);
+  document.getElementById('enc-stat-submitted').textContent  = enc ? enc.submitted : 1;
+  document.getElementById('enc-stat-points').textContent     = enc ? enc.points : 0;
+  document.getElementById('enc-stat-difficulty').textContent = diff.toUpperCase();
+
   document.getElementById('enc-step-1').classList.remove('active');
   document.getElementById('enc-step-2').classList.add('active');
 }
 
 function resetEncoder() {
   encType = null;
-  document.getElementById('enc-word-input').value = '';
-  document.getElementById('enc-hint-input').value = '';
-  document.getElementById('enc-preview-box').style.display = 'none';
-  document.querySelectorAll('.enc-type-card').forEach(c=>c.classList.remove('selected'));
+  encRails = 2;
+  document.getElementById('enc-word-input').value    = '';
+  document.getElementById('enc-keyword-input').value = '';
+  document.getElementById('enc-hint-input').value    = '';
+  document.getElementById('enc-preview-box').style.display    = 'none';
+  document.getElementById('enc-keyword-row').style.display    = 'none';
+  document.getElementById('enc-rails-row').style.display      = 'none';
+  document.getElementById('enc-rail-2').className = 'diff-btn active-easy';
+  document.getElementById('enc-rail-3').className = 'diff-btn';
+  document.querySelectorAll('.enc-type-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('enc-step-2').classList.remove('active');
   document.getElementById('enc-step-1').classList.add('active');
 }
