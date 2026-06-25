@@ -1105,7 +1105,7 @@ function startGame(type, daily=false) {
   isDaily = daily;
   usedIndices = [];
   const timeLimit = difficulty==='hard' ? 15 : 30;
-  state = { score:0, round:0, totalRounds:5, timer:null, timeLeft:timeLimit, timeLimit, correct:0, totalTime:0, hintUsed:false, currentWord:'', caesarShift:0 };
+  state = { score:0, round:0, totalRounds:5, timer:null, timeLeft:timeLimit, timeLimit, correct:0, totalTime:0, hintUsed:false, currentWord:'', caesarShift:0, currentKeyword:'', currentRails:2, currentDifficulty:'easy', _puzzleId:null };
   const labels = {
     morse:'MORSE CODE', anagram:'ANAGRAM', caesar:'CAESAR CIPHER', binary:'BINARY',
     atbash:'ATBASH CIPHER', vigenere:'VIGENÈRE CIPHER', railfence:'RAIL FENCE',
@@ -1215,6 +1215,224 @@ function setupBinaryRound() {
   document.getElementById('binary-hint-text').textContent = '';
 }
 
+// ── ATBASH ──
+function buildAtbashRef() {
+  document.getElementById('atbash-ref-grid').innerHTML =
+    `<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:3px;font-size:9px;text-align:center">` +
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => {
+      const enc = toAtbash(c);
+      return `<div><span style="color:#888;font-weight:bold">${enc}</span><span style="color:#444">→${c}</span></div>`;
+    }).join('') + `</div>`;
+}
+function setupAtbashRound() {
+  const {item} = pickUnused();
+  state.currentWord = item.word || item.text;
+  state.currentHint = item.hint;
+  state._encoder = item._encoder;
+  state._puzzleId = item._id || null;
+  document.getElementById('atbash-display').textContent = toAtbash(state.currentWord);
+  document.getElementById('atbash-input').value = '';
+  document.getElementById('atbash-input').className = 'answer-input';
+  document.getElementById('atbash-hint-text').textContent = '';
+  buildAtbashRef();
+}
+function checkAtbash() {
+  const val = document.getElementById('atbash-input').value.trim().toUpperCase();
+  if (!val) return;
+  clearInterval(state.timer);
+  const correct = val === state.currentWord;
+  document.getElementById('atbash-input').className = 'answer-input ' + (correct ? 'correct' : 'wrong');
+  resolveRound(correct);
+}
+
+// ── VIGENERE ──
+function buildVigenereRef(keyword) {
+  document.getElementById('vigenere-ref-grid').innerHTML =
+    keyword.split('').map((k, i) =>
+      `<span style="color:#555">${String.fromCharCode(65+i%26)}+${k}(${k.charCodeAt(0)-64}) </span>`
+    ).join('') + '<br><span style="color:#444;font-size:9px;">To decode: subtract each keyword letter value from encoded letter</span>';
+}
+function setupVigenereRound() {
+  const {item} = pickUnused();
+  state.currentWord = item.word || item.text;
+  state.currentHint = item.hint;
+  state.currentKeyword = item.keyword || 'KEY';
+  state._encoder = item._encoder;
+  state._puzzleId = item._id || null;
+  document.getElementById('vigenere-keyword-display').textContent = state.currentKeyword;
+  document.getElementById('vigenere-display').textContent = toVigenere(state.currentWord, state.currentKeyword);
+  document.getElementById('vigenere-input').value = '';
+  document.getElementById('vigenere-input').className = 'answer-input';
+  document.getElementById('vigenere-hint-text').textContent = '';
+  buildVigenereRef(state.currentKeyword);
+}
+function checkVigenere() {
+  const val = document.getElementById('vigenere-input').value.trim().toUpperCase();
+  if (!val) return;
+  clearInterval(state.timer);
+  const correct = val === state.currentWord;
+  document.getElementById('vigenere-input').className = 'answer-input ' + (correct ? 'correct' : 'wrong');
+  resolveRound(correct);
+}
+
+// ── RAIL FENCE ──
+function buildRailFenceVisual(word, rails) {
+  const fence = Array.from({length: rails}, () => Array(word.length).fill(' '));
+  let rail = 0, dir = 1;
+  for (let i = 0; i < word.length; i++) {
+    fence[rail][i] = word[i];
+    if (rail === 0) dir = 1;
+    if (rail === rails - 1) dir = -1;
+    rail += dir;
+  }
+  return fence.map(r => r.join('')).join('\n');
+}
+function setupRailFenceRound() {
+  const {item} = pickUnused();
+  state.currentWord = item.word || item.text;
+  state.currentHint = item.hint;
+  state.currentRails = item.rails || 2;
+  state._encoder = item._encoder;
+  state._puzzleId = item._id || null;
+  document.getElementById('railfence-label').textContent = `RAIL FENCE — ${state.currentRails} RAILS`;
+  document.getElementById('railfence-visual').textContent = buildRailFenceVisual(state.currentWord, state.currentRails);
+  document.getElementById('railfence-display').textContent = toRailFence(state.currentWord, state.currentRails);
+  document.getElementById('railfence-input').value = '';
+  document.getElementById('railfence-input').className = 'answer-input';
+  document.getElementById('railfence-hint-text').textContent = '';
+}
+function checkRailFence() {
+  const val = document.getElementById('railfence-input').value.trim().toUpperCase();
+  if (!val) return;
+  clearInterval(state.timer);
+  const correct = val === state.currentWord;
+  document.getElementById('railfence-input').className = 'answer-input ' + (correct ? 'correct' : 'wrong');
+  resolveRound(correct);
+}
+
+// ── POLYBIUS ──
+function buildPolybiusRef() {
+  const grid = 'ABCDEFGHIKLMNOPQRSTUVWXYZ';
+  document.getElementById('polybius-ref-grid').innerHTML =
+    grid.split('').map((c, i) => {
+      const row = Math.floor(i / 5) + 1, col = (i % 5) + 1;
+      return `<div class="polybius-cell"><span>${c}</span>${row}${col}</div>`;
+    }).join('');
+}
+function setupPolybiusRound() {
+  const {item} = pickUnused();
+  state.currentWord = item.word || item.text;
+  state.currentHint = item.hint;
+  state._encoder = item._encoder;
+  state._puzzleId = item._id || null;
+  document.getElementById('polybius-display').textContent = toPolybius(state.currentWord);
+  document.getElementById('polybius-input').value = '';
+  document.getElementById('polybius-input').className = 'answer-input';
+  document.getElementById('polybius-hint-text').textContent = '';
+  buildPolybiusRef();
+}
+function checkPolybius() {
+  const val = document.getElementById('polybius-input').value.trim().toUpperCase().replace(/J/g,'I');
+  if (!val) return;
+  clearInterval(state.timer);
+  const correct = val === state.currentWord.replace(/J/g,'I');
+  document.getElementById('polybius-input').className = 'answer-input ' + (correct ? 'correct' : 'wrong');
+  resolveRound(correct);
+}
+
+// ── COLUMNAR ──
+function buildColumnarRef(keyword) {
+  const key = keyword.toUpperCase();
+  const order = [...key].map((c, i) => ({c, i}))
+    .sort((a, b) => a.c.localeCompare(b.c));
+  document.getElementById('columnar-ref-grid').innerHTML =
+    `<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">` +
+    order.map((o, rank) =>
+      `<div style="text-align:center"><div style="color:#888;font-weight:bold">${o.c}</div><div style="color:#444">#${rank+1}</div></div>`
+    ).join('') + `</div>`;
+}
+function setupColumnarRound() {
+  const {item} = pickUnused();
+  state.currentWord = item.word || item.text;
+  state.currentHint = item.hint;
+  state.currentKeyword = item.keyword || 'KEY';
+  state._encoder = item._encoder;
+  state._puzzleId = item._id || null;
+  document.getElementById('columnar-keyword-display').textContent = state.currentKeyword;
+  document.getElementById('columnar-display').textContent = toColumnar(state.currentWord, state.currentKeyword);
+  document.getElementById('columnar-input').value = '';
+  document.getElementById('columnar-input').className = 'answer-input';
+  document.getElementById('columnar-hint-text').textContent = '';
+  buildColumnarRef(state.currentKeyword);
+}
+function checkColumnar() {
+  const val = document.getElementById('columnar-input').value.trim().toUpperCase().replace(/X/g,'');
+  if (!val) return;
+  clearInterval(state.timer);
+  const correct = val === state.currentWord.replace(/ /g,'');
+  document.getElementById('columnar-input').className = 'answer-input ' + (correct ? 'correct' : 'wrong');
+  resolveRound(correct);
+}
+
+// ── PIGPEN ──
+function buildPigpenRef() {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  document.getElementById('pigpen-ref-grid').innerHTML =
+    `<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px">` +
+    letters.split('').map(c =>
+      `<div style="text-align:center">${toPigpenSVG(c)}<div style="font-size:8px;color:#555;margin-top:2px">${c}</div></div>`
+    ).join('') + `</div>`;
+}
+function setupPigpenRound() {
+  const {item} = pickUnused();
+  state.currentWord = item.word || item.text;
+  state.currentHint = item.hint;
+  state._encoder = item._encoder;
+  state._puzzleId = item._id || null;
+  document.getElementById('pigpen-display').innerHTML = toPigpen(state.currentWord);
+  document.getElementById('pigpen-input').value = '';
+  document.getElementById('pigpen-input').className = 'answer-input';
+  document.getElementById('pigpen-hint-text').textContent = '';
+  buildPigpenRef();
+}
+function checkPigpen() {
+  const val = document.getElementById('pigpen-input').value.trim().toUpperCase();
+  if (!val) return;
+  clearInterval(state.timer);
+  const correct = val === state.currentWord;
+  document.getElementById('pigpen-input').className = 'answer-input ' + (correct ? 'correct' : 'wrong');
+  resolveRound(correct);
+}
+
+// ── PLAYFAIR ──
+function buildPlayfairRef(keyword) {
+  const grid = buildPlayfairGrid(keyword);
+  document.getElementById('playfair-ref-grid').innerHTML =
+    grid.map(c => `<div class="playfair-cell">${c}</div>`).join('');
+}
+function setupPlayfairRound() {
+  const {item} = pickUnused();
+  state.currentWord = item.word || item.text;
+  state.currentHint = item.hint;
+  state.currentKeyword = item.keyword || 'CIPHER';
+  state._encoder = item._encoder;
+  state._puzzleId = item._id || null;
+  document.getElementById('playfair-keyword-display').textContent = state.currentKeyword;
+  document.getElementById('playfair-display').textContent = toPlayfair(state.currentWord, state.currentKeyword);
+  document.getElementById('playfair-input').value = '';
+  document.getElementById('playfair-input').className = 'answer-input';
+  document.getElementById('playfair-hint-text').textContent = '';
+  buildPlayfairRef(state.currentKeyword);
+}
+function checkPlayfair() {
+  const val = document.getElementById('playfair-input').value.trim().toUpperCase().replace(/J/g,'I');
+  if (!val) return;
+  clearInterval(state.timer);
+  const correct = val === state.currentWord.replace(/J/g,'I');
+  document.getElementById('playfair-input').className = 'answer-input ' + (correct ? 'correct' : 'wrong');
+  resolveRound(correct);
+}
+
 // ── TILES ──
 function renderTiles() {
   document.getElementById('tile-pool').innerHTML = anagramPool.map((l,i) =>
@@ -1250,8 +1468,16 @@ function updateTimer() {
 function showHint(type) {
   if (state.hintUsed) return;
   state.hintUsed = true;
-  const ids = {morse:'morse-hint-text',anagram:'anagram-hint-text',caesar:'caesar-hint-text',binary:'binary-hint-text'};
-  document.getElementById(ids[type]).textContent = '💡 ' + state.currentHint;
+  const ids = {
+    morse:'morse-hint-text', anagram:'anagram-hint-text',
+    caesar:'caesar-hint-text', binary:'binary-hint-text',
+    atbash:'atbash-hint-text', vigenere:'vigenere-hint-text',
+    railfence:'railfence-hint-text', polybius:'polybius-hint-text',
+    columnar:'columnar-hint-text', pigpen:'pigpen-hint-text',
+    playfair:'playfair-hint-text',
+  };
+  const el = document.getElementById(ids[type]);
+  if (el) el.textContent = '💡 ' + state.currentHint;
 }
 
 // ── CHECK ANSWERS ──
@@ -1436,6 +1662,13 @@ document.getElementById('answer-input').addEventListener('keydown',e=>{ if(e.key
 document.getElementById('caesar-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkCaesar(); });
 document.getElementById('binary-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkBinary(); });
 document.getElementById('name-input').addEventListener('keydown',e=>{ if(e.key==='Enter') saveName(); });
+document.getElementById('atbash-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkAtbash(); });
+document.getElementById('vigenere-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkVigenere(); });
+document.getElementById('railfence-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkRailFence(); });
+document.getElementById('polybius-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkPolybius(); });
+document.getElementById('columnar-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkColumnar(); });
+document.getElementById('pigpen-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkPigpen(); });
+document.getElementById('playfair-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkPlayfair(); });
 
 // ── INIT ──
 (function init() {
