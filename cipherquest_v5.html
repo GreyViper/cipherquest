@@ -850,6 +850,41 @@ function incrementEncoderSubmitted(name) {
   save('cq_encoder_board', board);
 }
 
+// ── DIFFICULTY & STATS ──
+function calcDifficulty(type, wordLength) {
+  const complexity = {
+    morse:0, atbash:0,
+    caesar:1, binary:1, vigenere:1, railfence:1, polybius:1, anagram:1,
+    pigpen:2, columnar:2, playfair:2,
+  };
+  let tier = complexity[type] ?? 1;
+  if (wordLength <= 4) tier = Math.max(0, tier - 1);
+  if (wordLength >= 8) tier = Math.min(2, tier + 1);
+  return ['easy','medium','hard'][tier];
+}
+
+function refineDifficulty(baseDiff, puzzle) {
+  const attempts = (puzzle.solves || 0) + (puzzle.fails || 0);
+  if (attempts < 10) return baseDiff;
+  const failRate = (puzzle.fails || 0) / attempts;
+  const tiers = ['easy','medium','hard'];
+  let idx = tiers.indexOf(baseDiff);
+  if (failRate < 0.3) idx = Math.max(0, idx - 1);
+  else if (failRate > 0.6) idx = Math.min(2, idx + 1);
+  return tiers[idx];
+}
+
+function updatePuzzleStats(puzzleId, solved, timeUsed) {
+  if (!puzzleId) return;
+  const puzzles = getEncoderPuzzles();
+  const idx = puzzles.findIndex(p => p.id === puzzleId);
+  if (idx === -1) return;
+  if (solved) puzzles[idx].solves = (puzzles[idx].solves || 0) + 1;
+  else        puzzles[idx].fails  = (puzzles[idx].fails  || 0) + 1;
+  puzzles[idx].totalTime = (puzzles[idx].totalTime || 0) + timeUsed;
+  save('cq_encoder_puzzles', puzzles.slice(0, 50));
+}
+
 // ── SCREENS ──
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1170,6 +1205,8 @@ function nextRound() {
 function setupMorseRound() {
   const {item} = pickUnused();
   state.currentWord = item.word || item.text;
+  state.currentDifficulty = calcDifficulty('morse', state.currentWord.replace(/ /g,'').length);
+  state._puzzleId = item._id || null;
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   document.getElementById('cipher-display').textContent = toMorse(state.currentWord);
@@ -1180,6 +1217,8 @@ function setupMorseRound() {
 function setupAnagramRound() {
   const {item} = pickUnused();
   state.currentWord = item.word || item.text;
+  state.currentDifficulty = calcDifficulty('anagram', state.currentWord.replace(/ /g,'').length);
+  state._puzzleId = item._id || null;
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   document.getElementById('anagram-category').textContent = 'CATEGORY: ' + (item.category||'COMMUNITY');
@@ -1193,6 +1232,8 @@ function setupAnagramRound() {
 function setupCaesarRound() {
   const {item} = pickUnused();
   state.currentWord = item.text || item.word;
+  state.currentDifficulty = calcDifficulty('caesar', state.currentWord.replace(/ /g,'').length);
+  state._puzzleId = item._id || null;
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   const shift = Math.floor(Math.random()*8)+2;
@@ -1207,6 +1248,8 @@ function setupCaesarRound() {
 function setupBinaryRound() {
   const {item} = pickUnused();
   state.currentWord = item.word || item.text;
+  state.currentDifficulty = calcDifficulty('binary', state.currentWord.replace(/ /g,'').length);
+  state._puzzleId = item._id || null;
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   document.getElementById('binary-display').textContent = toBinary(state.currentWord);
@@ -1227,6 +1270,7 @@ function buildAtbashRef() {
 function setupAtbashRound() {
   const {item} = pickUnused();
   state.currentWord = item.word || item.text;
+  state.currentDifficulty = calcDifficulty('atbash', state.currentWord.replace(/ /g,'').length);
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   state._puzzleId = item._id || null;
@@ -1255,6 +1299,7 @@ function buildVigenereRef(keyword) {
 function setupVigenereRound() {
   const {item} = pickUnused();
   state.currentWord = item.word || item.text;
+  state.currentDifficulty = calcDifficulty('vigenere', state.currentWord.replace(/ /g,'').length);
   state.currentHint = item.hint;
   state.currentKeyword = item.keyword || 'KEY';
   state._encoder = item._encoder;
@@ -1290,6 +1335,7 @@ function buildRailFenceVisual(word, rails) {
 function setupRailFenceRound() {
   const {item} = pickUnused();
   state.currentWord = item.word || item.text;
+  state.currentDifficulty = calcDifficulty('railfence', state.currentWord.replace(/ /g,'').length);
   state.currentHint = item.hint;
   state.currentRails = item.rails || 2;
   state._encoder = item._encoder;
@@ -1322,6 +1368,7 @@ function buildPolybiusRef() {
 function setupPolybiusRound() {
   const {item} = pickUnused();
   state.currentWord = item.word || item.text;
+  state.currentDifficulty = calcDifficulty('polybius', state.currentWord.replace(/ /g,'').length);
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   state._puzzleId = item._id || null;
@@ -1354,6 +1401,7 @@ function buildColumnarRef(keyword) {
 function setupColumnarRound() {
   const {item} = pickUnused();
   state.currentWord = item.word || item.text;
+  state.currentDifficulty = calcDifficulty('columnar', state.currentWord.replace(/ /g,'').length);
   state.currentHint = item.hint;
   state.currentKeyword = item.keyword || 'KEY';
   state._encoder = item._encoder;
@@ -1386,6 +1434,7 @@ function buildPigpenRef() {
 function setupPigpenRound() {
   const {item} = pickUnused();
   state.currentWord = item.word || item.text;
+  state.currentDifficulty = calcDifficulty('pigpen', state.currentWord.replace(/ /g,'').length);
   state.currentHint = item.hint;
   state._encoder = item._encoder;
   state._puzzleId = item._id || null;
@@ -1413,6 +1462,7 @@ function buildPlayfairRef(keyword) {
 function setupPlayfairRound() {
   const {item} = pickUnused();
   state.currentWord = item.word || item.text;
+  state.currentDifficulty = calcDifficulty('playfair', state.currentWord.replace(/ /g,'').length);
   state.currentHint = item.hint;
   state.currentKeyword = item.keyword || 'CIPHER';
   state._encoder = item._encoder;
@@ -1515,28 +1565,39 @@ function checkBinary() {
 }
 
 function resolveRound(correct) {
+  const diff = state.currentDifficulty || 'easy';
+  const diffBonus = {easy:0, medium:25, hard:50};
+  const timeUsed = state.timeLimit - state.timeLeft;
+
   if (correct) {
-    const pts = Math.max(10, state.timeLeft*3) - (state.hintUsed?10:0);
+    const timePts = Math.max(10, state.timeLeft * 3);
+    const pts = timePts + diffBonus[diff] - (state.hintUsed ? 10 : 0);
     state.score += pts;
     state.correct++;
-    showFeedback(true, '+'+pts+' pts — CORRECT!');
+    showFeedback(true, '+' + pts + ' pts — CORRECT!');
     playCorrect();
+    if (state._encoder && timeUsed > state.timeLimit * 0.7) {
+      addEncoderPoints(state._encoder, 10);
+    }
+    updatePuzzleStats(state._puzzleId, true, timeUsed);
   } else {
-    showFeedback(false, 'WRONG — Answer: '+state.currentWord);
+    showFeedback(false, 'WRONG — Answer: ' + state.currentWord);
     playWrong();
-    // If this was an encoder puzzle, reward the encoder
-    if (state._encoder) addEncoderPoints(state._encoder, 15);
+    updatePuzzleStats(state._puzzleId, false, timeUsed);
   }
-  state.totalTime += (state.timeLimit - state.timeLeft);
-  setTimeout(()=>nextRound(), 1600);
+  state.totalTime += timeUsed;
+  setTimeout(() => nextRound(), 1600);
 }
 
 function timeUp() {
-  showFeedback(false, "TIME'S UP — Answer: "+state.currentWord);
+  const diff = state.currentDifficulty || 'easy';
+  const encPts = {easy:20, medium:35, hard:50};
+  showFeedback(false, "TIME'S UP — Answer: " + state.currentWord);
   playWrong();
-  if (state._encoder) addEncoderPoints(state._encoder, 15);
+  if (state._encoder) addEncoderPoints(state._encoder, encPts[diff]);
+  updatePuzzleStats(state._puzzleId, false, state.timeLimit);
   state.totalTime += state.timeLimit;
-  setTimeout(()=>nextRound(), 1800);
+  setTimeout(() => nextRound(), 1800);
 }
 
 function showFeedback(correct, msg) {
