@@ -884,6 +884,84 @@ const PLAYFAIR_HARD = [
   {word:'PYRAMID', keyword:'EGYPT',  hint:'Ancient triangular monument'},
 ];
 
+// ── DYNAMIC WORD BANKS ──
+// No J anywhere — Polybius/Playfair treat I=J so J would confuse players.
+const KEYWORDS = ['KEY','ACE','FIRE','MOON','STAR','CODE','LOCK','DARK','GOLD',
+  'IRON','MIST','WAVE','BOLT','SAGE','WOLF','ECHO','HAWK','PIKE','RUNE','VEIL'];
+
+const WORD_BANK_EASY = [
+  'ACE','AIM','ARC','ARK','ARM','ASH','BAR','BAT','BAY','BED','BOW','BOX','CAP','CAR',
+  'COP','COW','DEN','DEW','EAR','ELK','ELM','EYE','FAN','FAR','FIG','FIN','FOG','GAP',
+  'GEM','GUN','HAT','HAY','HEN','HIP','HOG','ICE','INK','IVY','KEG','LAD','LAP','LAW',
+  'LEG','LID','LIP','LOG','MAN','MAP','MOB','NAP','NET','NUT','OAK','OAR','OAT','ODD',
+  'OIL','ORB','ORE','OWL','PAD','PAN','PAW','PAY','PEA','PEG','PEN','PIN','POD','RAG',
+  'RAP','RAT','RAW','RAY','RED','RIB','RIM','ROD','ROT','ROW','RUG','RUN','SAP','SAW',
+  'SAY','SEA','SIP','SIT','SKY','SOD','SPY','SUM','TAP','TAR','TAX','TEA','TIP','TON',
+  'TOP','TOY','TUB','TUG','URN','VAN','VAT','VET','WAX','WEB','WIN','WIT','YAM','ZAP',
+  'ABLE','BACK','BAKE','BALL','BAND','BANK','BARN','BASE','BATH','BEAD','BEAN','BEAR',
+  'BEAT','BEER','BELL','BELT','BEND','BIKE','BIRD','BITE','BLUE','BOAT','BODY','BOLD',
+  'BOLT','BOND','BONE','BOOK','BOOT','BULL','BURN','CAGE','CAKE','CALL','CAMP','CANE',
+  'CARD','CARE','CART','CAVE','CHIP','COAL','COAT','COIN','COLD','COOL','CORD','CORN',
+  'COVE','CRAB','CROW','CURE','CURL','DAMP','DARE','DARK','DART','DASH','DATA','DAWN',
+  'DEAD','DEAL','DECK','DEED','DEER','DESK','DIET','DIRT','DISK','DIVE','DOME','DOSE',
+  'DOVE','DOWN','DROP','DRUM','DULL','DUSK','DUST','EARN','EDGE','EPIC','EVIL','FACE',
+  'FACT','FAIR','FALL','FAME','FAST','FATE','FEAR','FEAT','FEET','FERN','FILL','FILM',
+  'FINE','FLAG','FLAT','FLEW','FLIP','FLOW','FOAM','FOLK','FOND','FOOL','FOOT','FORD',
+  'FORK','FORM','FORT','FREE','FROG','FULL','GAIN','GALE','GATE','GEAR','GILT','GIRL',
+  'GLAD','GLOW','GOAT','GOLF','GOWN','GRAB','GRAY','GRID','GRIP','GROW','GULF','GUST',
+  'HACK','HAIL','HALF','HALL','HAND','HANG','HARD','HARM','HARP','HAUL','HEAL','HEAP',
+  'HEAR','HEAT','HEEL','HELM','HELP','HERB','HERD','HIKE','HILL','HINT','HIRE','HOLD',
+  'HOLE','HOME','HOOD','HOOK','HOPE','HORN','HOST','HOWL','HULL','HUNT','HURT',
+];
+
+const WORD_BANK_HARD = [
+  'ABSORB','ACCENT','ALMOST','AMOUNT','ANIMAL','ANSWER','ATTACK','BALLOT','BEACON',
+  'BATTLE','BRIDGE','BRIGHT','BROKEN','BRUTAL','BUDGET','CANDLE','CANNON','CASTLE',
+  'CENTER','CHANGE','CHARGE','CHOICE','CIRCLE','CIRCUS','CLEVER','COLUMN','COMBAT',
+  'CORNER','COTTON','COURSE','CREATE','CREDIT','CRISIS','CUSTOM','DAMAGE','DANGER',
+  'DEBATE','DEFEAT','DEMAND','DESERT','DETAIL','DETECT','DEVICE','DIRECT','DIVIDE',
+  'DONATE','DOUBLE','DRAGON','EFFECT','EFFORT','EMPIRE','ENCODE','ENERGY','ENGINE',
+  'ENSURE','ENTIRE','ESCAPE','EVOLVE','EXPAND','EXPERT','EXPOSE','EXTEND','FACTOR',
+  'FAMOUS','FIGURE','FILTER','FINGER','FINISH','FLIGHT','FOLLOW','FOREST','FORMAT',
+  'FREEZE','FROZEN','FUTURE','GALAXY','GARDEN','GATHER','GENTLE','GLOBAL','GOVERN',
+  'GROUND','GROWTH','HANDLE','HAPPEN','HARBOR','HOLDER','HUNTER','IMPACT','IMPORT',
+  'INCOME','ISLAND','KEEPER','KNIGHT','LAUNCH','LEADER','LEAGUE','LISTEN','MANAGE',
+  'MASTER','METHOD','MODERN','MOTION','NATIVE','NATURE','NEEDLE','OBTAIN','OFFICE',
+  'OPTION','OUTPUT','PALACE','PATROL','PLANET','PLENTY','POCKET','PORTAL','PREFER',
+  'PRINCE','PROFIT','PROPER','PROVEN','PURSUE','RANDOM','REASON','RECORD','REFORM',
+  'REGION','REMAIN','RESCUE','REVEAL','REVIEW','REVIVE','REWARD','RITUAL','ROBUST',
+  'ROCKET','SAFELY','SAMPLE','SEARCH','SECRET','SELECT','SIGNAL','SIMPLE','SILVER',
+  'SMOOTH','SOURCE','SPIRIT','SPREAD','SPRING','STATUE','STEADY','STREAM','STRICT',
+  'STRONG','SUBMIT','SUDDEN','SUPPLY','SWITCH','SYSTEM','TARGET','TEMPLE','THEORY',
+  'THREAT','THRONE','TIMBER','TRAVEL','TROPHY','TUNNEL','UNIQUE','UNITED','UNLOCK',
+  'VALLEY','VISION','VOLUME','WARDEN','WEAPON','WISDOM','WONDER','BALANCE','CAPITAL',
+  'CENTURY','CHAPTER','CITIZEN','CLASSIC','COLLECT','COMMAND','COMPASS','COMPETE',
+  'COMPLEX','CONCEPT','CONCERN','CONNECT','CONTAIN','CONTROL','CONVERT','CORRECT',
+  'CULTURE','CURRENT','DEFENSE','DEVELOP','DIGITAL','DISPLAY','DISTANT','DIVERSE',
+  'FANTASY','FEATURE','FORMULA','FREEDOM','GENERAL','HARVEST','HISTORY','HORIZON',
+  'IMAGINE','IMPROVE','INSPIRE','MESSAGE','MISSING','MISSION','MONSTER','MORNING',
+  'MYSTERY','NATURAL','NETWORK','NUCLEAR','OBSERVE','PHANTOM','PATTERN','PICTURE',
+  'POPULAR','PREDICT','PRESENT','PRIMARY','PROBLEM','PROCESS','PRODUCT','PROGRAM',
+  'PROJECT','PROTECT','PROVIDE','PURPOSE','QUALITY','QUANTUM','REALITY','RECEIVE',
+  'RELEASE','REPLACE','REQUIRE','RESOLVE','RESPECT','RESTORE','REVENUE','SUPPORT',
+  'SURFACE','SURVIVE','THUNDER','UPGRADE','VERSION','VILLAGE','WARFARE','WARNING',
+  'WELCOME','WESTERN',
+];
+
+function buildDynamicPool(type) {
+  const isHard = difficulty === 'hard';
+  const bank = isHard ? WORD_BANK_HARD : WORD_BANK_EASY;
+  return bank.map((word, i) => {
+    const kw = KEYWORDS[i % KEYWORDS.length];
+    if (type === 'caesar')    return { text: word, hint: '' };
+    if (type === 'anagram')   return { word, category: 'GENERAL', hint: '' };
+    if (type === 'vigenere' || type === 'columnar' || type === 'playfair')
+                              return { word, keyword: kw, hint: '' };
+    if (type === 'railfence') return { word, rails: isHard ? 3 : 2, hint: '' };
+    return { word, hint: '' };
+  });
+}
+
 // ── STATE ──
 let difficulty = 'easy';
 let currentGameType = 'morse';
@@ -1223,7 +1301,8 @@ function getWordPool(type) {
   };
   const pair = pools[type];
   if (!pair) return [];
-  return difficulty === 'hard' ? pair[1] : pair[0];
+  const staticPool = difficulty === 'hard' ? pair[1] : pair[0];
+  return [...staticPool, ...buildDynamicPool(type)];
 }
 
 function startGame(type, daily=false) {
